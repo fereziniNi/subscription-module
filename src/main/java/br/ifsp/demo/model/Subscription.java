@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public class Subscription {
+
+    private final UUID id;
     private final UUID customerId;
     private final PlanType planType;
     private final BillingCycle billingCycle;
@@ -11,11 +13,16 @@ public class Subscription {
     private final BigDecimal amount;
 
     public Subscription(UUID customerId, PlanType planType, BillingCycle billingCycle, SubscriptionStatus status, BigDecimal amount) {
+        this.id = UUID.randomUUID();
         this.customerId = customerId;
         this.planType = planType;
         this.billingCycle = billingCycle;
         this.status = status;
         this.amount = amount;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public UUID getCustomerId() {
