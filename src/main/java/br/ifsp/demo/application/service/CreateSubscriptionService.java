@@ -20,7 +20,10 @@ public class CreateSubscriptionService {
     }
 
     public Subscription create(UUID customerId, PlanType planType, BillingCycle billingCycle) {
-        userRepository.findById(customerId);
+        if (userRepository.findById(customerId).isEmpty()) {
+            throw new IllegalArgumentException("Customer does not exist");
+        }
+
 
         return new Subscription(customerId, planType, billingCycle, SubscriptionStatus.ACTIVE,new BigDecimal("29.90"));
     }
