@@ -41,7 +41,7 @@ class CreateSubscriptionServiceTest {
         SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
 
 
-        CreateSubscriptionService service = new CreateSubscriptionService(userRepository);
+        CreateSubscriptionService service = new CreateSubscriptionService(userRepository, subscriptionRepository);
 
         Subscription subscription = service.create(customerId, PlanType.BASIC, BillingCycle.MONTHLY);
 
@@ -65,7 +65,7 @@ class CreateSubscriptionServiceTest {
         SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
 
 
-        CreateSubscriptionService service = new CreateSubscriptionService(userRepository);
+        CreateSubscriptionService service = new CreateSubscriptionService(userRepository, subscriptionRepository);
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
@@ -75,7 +75,7 @@ class CreateSubscriptionServiceTest {
         assertEquals("Customer does not exist", exception.getMessage());
 
         verify(userRepository).findById(customerId);
-        verify(subscriptionRepository).save(subscription);
+        verify(subscriptionRepository, never()).save(any());
 
     }
 }

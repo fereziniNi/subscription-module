@@ -1,4 +1,8 @@
 package br.ifsp.demo.repository;
 
-public class SubscriptionRepository {
+import br.ifsp.demo.model.Subscription;
+
+public interface SubscriptionRepository {
+    void save(Subscription subscription);
+
 }
