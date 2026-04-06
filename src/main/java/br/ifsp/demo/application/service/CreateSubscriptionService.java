@@ -26,12 +26,21 @@ public class CreateSubscriptionService {
         if (userRepository.findById(customerId).isEmpty()) {
             throw new IllegalArgumentException("Customer does not exist");
         }
+
+        BigDecimal amount = planType.getMonthlyPrice();
+
+        if (billingCycle == BillingCycle.YEARLY) {
+            amount = planType.getMonthlyPrice()
+                    .multiply(new BigDecimal("12"))
+                    .multiply(new BigDecimal("0.60"));
+        }
+
         Subscription subscription = new Subscription(
                 customerId,
                 planType,
                 billingCycle,
                 SubscriptionStatus.ACTIVE,
-                planType.getMonthlyPrice()
+                amount
         );
 
         subscriptionRepository.save(subscription);

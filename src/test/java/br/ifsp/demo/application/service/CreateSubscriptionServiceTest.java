@@ -101,7 +101,7 @@ class CreateSubscriptionServiceTest {
 
         Subscription subscription = service.create(customerId, PlanType.PLUS, BillingCycle.YEARLY);
 
-        assertEquals(new BigDecimal("359.28"), subscription.getAmount());
+        assertEquals(0, new BigDecimal("359.28").compareTo(subscription.getAmount()));
 
         verify(userRepository).findById(customerId);
         verify(subscriptionRepository).save(subscription);
