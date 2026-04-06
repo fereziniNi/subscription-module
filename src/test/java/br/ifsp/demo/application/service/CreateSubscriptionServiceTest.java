@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @Tag("UnitTest")
@@ -39,6 +38,9 @@ class CreateSubscriptionServiceTest {
         JpaUserRepository userRepository = mock(JpaUserRepository.class);
         when(userRepository.findById(customerId)).thenReturn(Optional.of(user));
 
+        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
+
+
         CreateSubscriptionService service = new CreateSubscriptionService(userRepository);
 
         Subscription subscription = service.create(customerId, PlanType.BASIC, BillingCycle.MONTHLY);
@@ -50,6 +52,7 @@ class CreateSubscriptionServiceTest {
         assertEquals(new BigDecimal("29.90"), subscription.getAmount());
 
         verify(userRepository).findById(customerId);
+        verify(subscriptionRepository).save(subscription);
     }
 
     @Test
@@ -58,6 +61,9 @@ class CreateSubscriptionServiceTest {
 
         JpaUserRepository userRepository = mock(JpaUserRepository.class);
         when(userRepository.findById(customerId)).thenReturn(Optional.empty());
+
+        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
+
 
         CreateSubscriptionService service = new CreateSubscriptionService(userRepository);
 
@@ -69,6 +75,7 @@ class CreateSubscriptionServiceTest {
         assertEquals("Customer does not exist", exception.getMessage());
 
         verify(userRepository).findById(customerId);
+        verify(subscriptionRepository).save(subscription);
 
     }
 }
