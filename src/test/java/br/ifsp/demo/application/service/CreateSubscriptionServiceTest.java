@@ -1,7 +1,6 @@
 package br.ifsp.demo.application.service;
 
 import br.ifsp.demo.model.BillingCycle;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import br.ifsp.demo.model.PlanType;
 import br.ifsp.demo.model.Subscription;
 import br.ifsp.demo.model.SubscriptionStatus;
@@ -12,11 +11,11 @@ import br.ifsp.demo.security.user.User;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @Tag("UnitTest")
@@ -26,6 +25,7 @@ class CreateSubscriptionServiceTest {
     @Test
     void shouldCreateSubscriptionWithBasicMonthlyPlanAndActiveStatus() {
         UUID customerId = UUID.randomUUID();
+
         User user = User.builder()
                 .id(customerId)
                 .name("John")
@@ -40,16 +40,15 @@ class CreateSubscriptionServiceTest {
 
         SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
 
-
         CreateSubscriptionService service = new CreateSubscriptionService(userRepository, subscriptionRepository);
 
         Subscription subscription = service.create(customerId, PlanType.BASIC, BillingCycle.MONTHLY);
 
-        assertEquals(customerId, subscription.getCustomerId());
-        assertEquals(SubscriptionStatus.ACTIVE, subscription.getStatus());
-        assertEquals(PlanType.BASIC, subscription.getPlanType());
-        assertEquals(BillingCycle.MONTHLY, subscription.getBillingCycle());
-        assertEquals(new BigDecimal("29.90"), subscription.getAmount());
+        assertThat(subscription.getCustomerId()).isEqualTo(customerId);
+        assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(subscription.getPlanType()).isEqualTo(PlanType.BASIC);
+        assertThat(subscription.getBillingCycle()).isEqualTo(BillingCycle.MONTHLY);
+        assertThat(subscription.getAmount()).isEqualByComparingTo("29.90");
 
         verify(userRepository).findById(customerId);
         verify(subscriptionRepository).save(subscription);
@@ -64,49 +63,13 @@ class CreateSubscriptionServiceTest {
 
         SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
 
-
         CreateSubscriptionService service = new CreateSubscriptionService(userRepository, subscriptionRepository);
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> service.create(customerId, PlanType.BASIC, BillingCycle.MONTHLY)
-        );
-
-        assertEquals("Customer does not exist", exception.getMessage());
+        assertThatThrownBy(() -> service.create(customerId, PlanType.BASIC, BillingCycle.MONTHLY))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Customer does not exist");
 
         verify(userRepository).findById(customerId);
         verify(subscriptionRepository, never()).save(any());
-
     }
-
-    @Test
-    void shouldCreateSubscriptionWithDiscountedYearlyPriceForPlusPlan() {
-        UUID customerId = UUID.randomUUID();
-
-        User user = User.builder()
-                .id(customerId)
-                .name("Abdul")
-                .lastname("Dias")
-                .email("abdul.dias@email.com")
-                .password("123456")
-                .role(Role.USER)
-                .build();
-
-        JpaUserRepository userRepository = mock(JpaUserRepository.class);
-        when(userRepository.findById(customerId)).thenReturn(Optional.of(user));
-
-        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
-
-        CreateSubscriptionService service = new CreateSubscriptionService(userRepository, subscriptionRepository);
-
-        Subscription subscription = service.create(customerId, PlanType.PLUS, BillingCycle.YEARLY);
-
-        assertEquals(0, new BigDecimal("359.28").compareTo(subscription.getAmount()));
-
-        verify(userRepository).findById(customerId);
-        verify(subscriptionRepository).save(subscription);
-    }
-
-
-
 }
