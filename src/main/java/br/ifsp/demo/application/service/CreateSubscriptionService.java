@@ -31,7 +31,7 @@ public class CreateSubscriptionService {
                 planType,
                 billingCycle,
                 SubscriptionStatus.ACTIVE,
-                new BigDecimal("29.90")
+                planType.getMonthlyPrice()
         );
 
         subscriptionRepository.save(subscription);
