@@ -46,10 +46,12 @@ class CreateSubscriptionServiceTest {
 
         assertThat(subscription.getId()).isNotNull();
         assertThat(subscription.getCustomerId()).isEqualTo(customerId);
+        assertThat(subscription.getBillingPeriod()).isNotNull();
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
         assertThat(subscription.getPlanType()).isEqualTo(PlanType.BASIC);
         assertThat(subscription.getBillingCycle()).isEqualTo(BillingCycle.MONTHLY);
         assertThat(subscription.getAmount()).isEqualByComparingTo("29.90");
+
 
 
         verify(userRepository).findById(customerId);
