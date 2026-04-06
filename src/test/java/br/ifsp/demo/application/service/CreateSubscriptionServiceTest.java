@@ -1,6 +1,7 @@
 package br.ifsp.demo.application.service;
 
 import br.ifsp.demo.model.BillingCycle;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import br.ifsp.demo.model.PlanType;
 import br.ifsp.demo.model.Subscription;
 import br.ifsp.demo.model.SubscriptionStatus;
@@ -49,5 +50,25 @@ class CreateSubscriptionServiceTest {
         assertEquals(new BigDecimal("29.90"), subscription.getAmount());
 
         verify(userRepository).findById(customerId);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserIsNotRegistered() {
+        UUID customerId = UUID.randomUUID();
+
+        JpaUserRepository userRepository = mock(JpaUserRepository.class);
+        when(userRepository.findById(customerId)).thenReturn(Optional.empty());
+
+        CreateSubscriptionService service = new CreateSubscriptionService(userRepository);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.create(customerId, PlanType.BASIC, BillingCycle.MONTHLY)
+        );
+
+        assertEquals("Customer does not exist", exception.getMessage());
+
+        verify(userRepository).findById(customerId);
+
     }
 }
