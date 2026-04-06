@@ -78,4 +78,35 @@ class CreateSubscriptionServiceTest {
         verify(subscriptionRepository, never()).save(any());
 
     }
+
+    @Test
+    void shouldCreateSubscriptionWithDiscountedYearlyPriceForPlusPlan() {
+        UUID customerId = UUID.randomUUID();
+
+        User user = User.builder()
+                .id(customerId)
+                .name("Abdul")
+                .lastname("Dias")
+                .email("abdul.dias@email.com")
+                .password("123456")
+                .role(Role.USER)
+                .build();
+
+        JpaUserRepository userRepository = mock(JpaUserRepository.class);
+        when(userRepository.findById(customerId)).thenReturn(Optional.of(user));
+
+        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
+
+        CreateSubscriptionService service = new CreateSubscriptionService(userRepository, subscriptionRepository);
+
+        Subscription subscription = service.create(customerId, PlanType.PLUS, BillingCycle.YEARLY);
+
+        assertEquals(new BigDecimal("359.28"), subscription.getAmount());
+
+        verify(userRepository).findById(customerId);
+        verify(subscriptionRepository).save(subscription);
+    }
+
+
+
 }
