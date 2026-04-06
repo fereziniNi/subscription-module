@@ -1,14 +1,12 @@
 package br.ifsp.demo.application.service;
 
+import br.ifsp.demo.model.*;
 import br.ifsp.demo.repository.SubscriptionRepository;
 import br.ifsp.demo.security.user.JpaUserRepository;
 import org.springframework.stereotype.Service;
-import br.ifsp.demo.model.BillingCycle;
-import br.ifsp.demo.model.PlanType;
-import br.ifsp.demo.model.Subscription;
-import br.ifsp.demo.model.SubscriptionStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 
@@ -35,12 +33,15 @@ public class CreateSubscriptionService {
                     .multiply(new BigDecimal("0.60"));
         }
 
+        BillingPeriod billingPeriod = new BillingPeriod(LocalDate.now(), LocalDate.now().plusMonths(1));
+
         Subscription subscription = new Subscription(
                 customerId,
                 planType,
                 billingCycle,
                 SubscriptionStatus.ACTIVE,
-                amount
+                amount,
+                billingPeriod
         );
 
         subscriptionRepository.save(subscription);

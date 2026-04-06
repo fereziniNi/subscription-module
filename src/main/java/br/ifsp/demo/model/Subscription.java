@@ -11,14 +11,16 @@ public class Subscription {
     private final BillingCycle billingCycle;
     private final SubscriptionStatus status;
     private final BigDecimal amount;
+    private final BillingPeriod billingPeriod;
 
-    public Subscription(UUID customerId, PlanType planType, BillingCycle billingCycle, SubscriptionStatus status, BigDecimal amount) {
+    public Subscription(UUID customerId, PlanType planType, BillingCycle billingCycle, SubscriptionStatus status, BigDecimal amount,  BillingPeriod billingPeriod) {
         this.id = UUID.randomUUID();
         this.customerId = customerId;
         this.planType = planType;
         this.billingCycle = billingCycle;
         this.status = status;
         this.amount = amount;
+        this.billingPeriod = billingPeriod;
     }
 
     public UUID getId() {
@@ -43,6 +45,10 @@ public class Subscription {
 
     public BigDecimal getAmount() {
         return amount;
+    }
+
+    public BillingPeriod getBillingPeriod() {
+        return billingPeriod;
     }
 
 }
