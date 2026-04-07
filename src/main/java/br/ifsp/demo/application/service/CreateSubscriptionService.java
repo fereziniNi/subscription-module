@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.UUID;
-
-import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 
@@ -29,6 +27,10 @@ public class CreateSubscriptionService {
     public Subscription create(UUID customerId, PlanType planType, BillingCycle billingCycle) {
         if (userRepository.findById(customerId).isEmpty()) {
             throw new IllegalArgumentException("Customer does not exist");
+        }
+
+        if (subscriptionRepository.existsActiveByCustomerId(customerId)) {
+            throw new IllegalArgumentException("Customer already has an active subscription");
         }
 
         BigDecimal amount = planType.getMonthlyPrice();
