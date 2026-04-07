@@ -11,6 +11,9 @@ import br.ifsp.demo.security.user.User;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,25 +25,22 @@ import static org.mockito.Mockito.*;
 @Tag("TDD")
 class CreateSubscriptionServiceTest {
 
+    private final LocalDate fixedDate = LocalDate.of(2026, 4, 6);
+    private final Clock fixedClock = Clock.fixed(
+            fixedDate.atStartOfDay(ZoneId.systemDefault()).toInstant(),
+            ZoneId.systemDefault()
+    );
+
     @Test
     void shouldCreateSubscriptionWithBasicMonthlyPlanAndActiveStatus() {
         UUID customerId = UUID.randomUUID();
 
-        User user = User.builder()
-                .id(customerId)
-                .name("John")
-                .lastname("Snow")
-                .email("john.snow@email.com")
-                .password("123456")
-                .role(Role.USER)
-                .build();
-
         JpaUserRepository userRepository = mock(JpaUserRepository.class);
-        when(userRepository.findById(customerId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(customerId)).thenReturn(Optional.of(buildUser(customerId)));
 
         SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
 
-        CreateSubscriptionService service = new CreateSubscriptionService(userRepository, subscriptionRepository);
+        CreateSubscriptionService service = createService(userRepository, subscriptionRepository);
 
         Subscription subscription = service.create(customerId, PlanType.BASIC, BillingCycle.MONTHLY);
 
@@ -51,8 +51,6 @@ class CreateSubscriptionServiceTest {
         assertThat(subscription.getPlanType()).isEqualTo(PlanType.BASIC);
         assertThat(subscription.getBillingCycle()).isEqualTo(BillingCycle.MONTHLY);
         assertThat(subscription.getAmount()).isEqualByComparingTo("29.90");
-
-
 
         verify(userRepository).findById(customerId);
         verify(subscriptionRepository).save(subscription);
@@ -67,7 +65,7 @@ class CreateSubscriptionServiceTest {
 
         SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
 
-        CreateSubscriptionService service = new CreateSubscriptionService(userRepository, subscriptionRepository);
+        CreateSubscriptionService service = createService(userRepository, subscriptionRepository);
 
         assertThatThrownBy(() -> service.create(customerId, PlanType.BASIC, BillingCycle.MONTHLY))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -77,5 +75,41 @@ class CreateSubscriptionServiceTest {
         verify(subscriptionRepository, never()).save(any());
     }
 
+    @Test
+    void shouldDefineInitialBillingPeriodForProMonthlySubscription() {
+        UUID customerId = UUID.randomUUID();
 
+        JpaUserRepository userRepository = mock(JpaUserRepository.class);
+        when(userRepository.findById(customerId)).thenReturn(Optional.of(buildUser(customerId)));
+
+        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
+
+        CreateSubscriptionService service = createService(userRepository, subscriptionRepository);
+
+        Subscription subscription = service.create(customerId, PlanType.PRO, BillingCycle.MONTHLY);
+
+        assertThat(subscription.getBillingPeriod()).isNotNull();
+        assertThat(subscription.getBillingPeriod().getStartDate()).isEqualTo(fixedDate);
+        assertThat(subscription.getBillingPeriod().getEndDate())
+                .isAfter(subscription.getBillingPeriod().getStartDate());
+
+        verify(userRepository).findById(customerId);
+        verify(subscriptionRepository).save(subscription);
+    }
+
+    private CreateSubscriptionService createService(JpaUserRepository userRepository,
+                                                    SubscriptionRepository subscriptionRepository) {
+        return new CreateSubscriptionService(userRepository, subscriptionRepository, fixedClock);
+    }
+
+    private User buildUser(UUID customerId) {
+        return User.builder()
+                .id(customerId)
+                .name("John")
+                .lastname("Snow")
+                .email("john.snow@email.com")
+                .password("123456")
+                .role(Role.USER)
+                .build();
+    }
 }

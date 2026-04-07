@@ -6,8 +6,11 @@ import br.ifsp.demo.security.user.JpaUserRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.UUID;
+
+import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDate;
 
 
 @Service
@@ -15,9 +18,12 @@ public class CreateSubscriptionService {
     private final JpaUserRepository userRepository;
     private final SubscriptionRepository subscriptionRepository;
 
-    public CreateSubscriptionService(JpaUserRepository userRepository,SubscriptionRepository subscriptionRepository) {
+    private final Clock clock;
+
+    public CreateSubscriptionService(JpaUserRepository userRepository,SubscriptionRepository subscriptionRepository, Clock clock) {
         this.userRepository = userRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.clock = clock;
     }
 
     public Subscription create(UUID customerId, PlanType planType, BillingCycle billingCycle) {
@@ -33,7 +39,12 @@ public class CreateSubscriptionService {
                     .multiply(new BigDecimal("0.60"));
         }
 
-        BillingPeriod billingPeriod = new BillingPeriod(LocalDate.now(), LocalDate.now().plusMonths(1));
+        LocalDate creationDate = LocalDate.now(clock);
+
+        BillingPeriod billingPeriod = switch (billingCycle) {
+            case MONTHLY -> new BillingPeriod(creationDate, creationDate.plusMonths(1));
+            case YEARLY -> new BillingPeriod(creationDate, creationDate.plusYears(1));
+        };
 
         Subscription subscription = new Subscription(
                 customerId,
