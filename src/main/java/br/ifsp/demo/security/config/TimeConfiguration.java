@@ -1,4 +1,4 @@
-package br.ifsp.demo.config;
+package br.ifsp.demo.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
