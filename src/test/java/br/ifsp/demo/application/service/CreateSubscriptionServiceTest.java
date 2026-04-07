@@ -112,4 +112,25 @@ class CreateSubscriptionServiceTest {
                 .role(Role.USER)
                 .build();
     }
+
+    @Test
+    void shouldThrowExceptionWhenCustomerAlreadyHasAnActiveSubscription() {
+        UUID customerId = UUID.randomUUID();
+
+        JpaUserRepository userRepository = mock(JpaUserRepository.class);
+        when(userRepository.findById(customerId)).thenReturn(Optional.of(buildUser(customerId)));
+
+        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
+        when(subscriptionRepository.existsActiveByCustomerId(customerId)).thenReturn(true);
+
+        CreateSubscriptionService service = createService(userRepository, subscriptionRepository);
+
+        assertThatThrownBy(() -> service.create(customerId, PlanType.BASIC, BillingCycle.MONTHLY))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Customer already has an active subscription");
+
+        verify(userRepository).findById(customerId);
+        verify(subscriptionRepository).existsActiveByCustomerId(customerId);
+        verify(subscriptionRepository, never()).save(any());
+    }
 }
