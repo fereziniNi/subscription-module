@@ -7,7 +7,7 @@ public class Subscription {
 
     private final UUID id;
     private final UUID customerId;
-    private final PlanType planType;
+    private  PlanType planType;
     private final BillingCycle billingCycle;
     private final SubscriptionStatus status;
     private final BigDecimal amount;
@@ -21,6 +21,10 @@ public class Subscription {
         this.status = status;
         this.amount = amount;
         this.billingPeriod = billingPeriod;
+    }
+
+    public void changePlan(PlanType newPlanType) {
+        this.planType = newPlanType;
     }
 
     public UUID getId() {
