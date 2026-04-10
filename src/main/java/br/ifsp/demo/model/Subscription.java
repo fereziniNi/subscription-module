@@ -25,6 +25,10 @@ public class Subscription {
     }
 
     public void changePlan(PlanType newPlanType) {
+        if (this.status == SubscriptionStatus.CANCELLED) {
+            throw new IllegalStateException("Inactive subscription");
+        }
+
         if (this.planType == newPlanType) {
             throw new IllegalArgumentException("Plan already contracted");
         }
