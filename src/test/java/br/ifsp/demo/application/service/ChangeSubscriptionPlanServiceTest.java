@@ -7,7 +7,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +28,12 @@ class ChangeSubscriptionPlanServiceTest {
     void setUp() {
         subscriptionRepository = mock(SubscriptionRepository.class);
         sut = new ChangeSubscriptionPlanService(subscriptionRepository);
+
+        Clock fixedClock = Clock.fixed(
+                Instant.parse("2026-04-16T00:00:00Z"),
+                ZoneId.of("UTC")
+        );
+
     }
 
     @Test
@@ -209,5 +218,30 @@ class ChangeSubscriptionPlanServiceTest {
 
         verify(subscriptionRepository, never()).save(any());
     }
+
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldChangePlanImmediatelyAndCalculateProratedChargeWhenUpgradingFromBasicToPlus() {
+        UUID subscriptionId = UUID.randomUUID();
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription updatedSubscription = sut.changePlan(subscriptionId, PlanType.PLUS);
+
+        assertThat(updatedSubscription.getPlanType()).isEqualTo(PlanType.PLUS);
+        assertThat(updatedSubscription.getProratedChargeAmount()).isEqualByComparingTo("10.00");
+        verify(subscriptionRepository).save(subscription);
+    }
+
 
 }
