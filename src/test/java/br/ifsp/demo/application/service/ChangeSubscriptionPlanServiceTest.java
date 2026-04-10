@@ -289,4 +289,29 @@ class ChangeSubscriptionPlanServiceTest {
         verify(subscriptionRepository).save(subscription);
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldScheduleDowngradeWithoutImmediateChargeWhenChangingFromPlusToBasic() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.PLUS,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("49.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription updatedSubscription = sut.changePlan(subscriptionId, PlanType.BASIC);
+
+        assertThat(updatedSubscription.getPlanType()).isEqualTo(PlanType.PLUS);
+        assertThat(updatedSubscription.getScheduledPlanType()).isEqualTo(PlanType.BASIC);
+        assertThat(updatedSubscription.getProratedChargeAmount()).isNull();
+        verify(subscriptionRepository).save(subscription);
+    }
+
 }
