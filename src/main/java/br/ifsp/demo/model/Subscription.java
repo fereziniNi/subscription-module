@@ -8,6 +8,7 @@ public class Subscription {
     private final UUID id;
     private final UUID customerId;
     private  PlanType planType;
+    private PlanType scheduledPlanType;
     private final BillingCycle billingCycle;
     private final SubscriptionStatus status;
     private final BigDecimal amount;
@@ -24,7 +25,12 @@ public class Subscription {
     }
 
     public void changePlan(PlanType newPlanType) {
-        this.planType = newPlanType;
+        if (newPlanType.ordinal() > this.planType.ordinal()) {
+            this.planType = newPlanType;
+            this.scheduledPlanType = null;
+            return;
+        }
+        this.scheduledPlanType = newPlanType;
     }
 
     public UUID getId() {
@@ -53,6 +59,10 @@ public class Subscription {
 
     public BillingPeriod getBillingPeriod() {
         return billingPeriod;
+    }
+
+    public PlanType getScheduledPlanType() {
+        return scheduledPlanType;
     }
 
 }
