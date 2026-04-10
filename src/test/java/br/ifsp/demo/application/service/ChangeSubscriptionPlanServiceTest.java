@@ -141,6 +141,33 @@ class ChangeSubscriptionPlanServiceTest {
 
         verify(subscriptionRepository, never()).save(any());
     }
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldRemoveScheduledDowngradeAndChangeCurrentPlanImmediatelyWhenUpgradeToProIsRequested() {
+        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
+        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
+
+        UUID subscriptionId = UUID.randomUUID();
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.PLUS,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("49.90"),
+                new BillingPeriod(LocalDate.now(), LocalDate.now().plusMonths(1))
+        );
+
+        subscription.changePlan(PlanType.BASIC);
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription updatedSubscription = sut.changePlan(subscriptionId, PlanType.PRO);
+
+        assertThat(updatedSubscription.getPlanType()).isEqualTo(PlanType.PRO);
+        assertThat(updatedSubscription.getScheduledPlanType()).isNull();
+        verify(subscriptionRepository).save(subscription);
+    }
 
 
 
