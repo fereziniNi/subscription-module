@@ -1,7 +1,11 @@
 package br.ifsp.demo.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
+
 
 public class Subscription {
 
@@ -9,10 +13,12 @@ public class Subscription {
     private final UUID customerId;
     private  PlanType planType;
     private PlanType scheduledPlanType;
+    private BigDecimal proratedChargeAmount;
     private final BillingCycle billingCycle;
     private final SubscriptionStatus status;
     private final BigDecimal amount;
     private final BillingPeriod billingPeriod;
+
 
     public Subscription(UUID customerId, PlanType planType, BillingCycle billingCycle, SubscriptionStatus status, BigDecimal amount,  BillingPeriod billingPeriod) {
         this.id = UUID.randomUUID();
@@ -24,7 +30,7 @@ public class Subscription {
         this.billingPeriod = billingPeriod;
     }
 
-    public void changePlan(PlanType newPlanType) {
+    public void changePlan(PlanType newPlanType, LocalDate currentDate) {
         if (this.status == SubscriptionStatus.SUSPENDED) {
             throw new IllegalStateException("Suspended subscription");
         }
@@ -37,11 +43,34 @@ public class Subscription {
         }
 
         if (newPlanType.ordinal() > this.planType.ordinal()) {
-            this.planType = newPlanType;
-            this.scheduledPlanType = null;
+            applyImmediateUpgrade(newPlanType, currentDate);
             return;
         }
+        scheduleDowngrade(newPlanType);
+    }
+
+    private void applyImmediateUpgrade(PlanType newPlanType, LocalDate currentDate) {
+        BigDecimal priceDifference = newPlanType.getMonthlyPrice().subtract(this.planType.getMonthlyPrice());
+        long totalDays = ChronoUnit.DAYS.between(
+                billingPeriod.getStartDate(),
+                billingPeriod.getEndDate()
+        );
+        long remainingDays = ChronoUnit.DAYS.between(
+                currentDate,
+                billingPeriod.getEndDate()
+        );
+
+        this.proratedChargeAmount = priceDifference
+                .multiply(BigDecimal.valueOf(remainingDays))
+                .divide(BigDecimal.valueOf(totalDays), 2, RoundingMode.HALF_UP);
+
+        this.planType = newPlanType;
+        this.scheduledPlanType = null;
+    }
+
+    private void scheduleDowngrade(PlanType newPlanType) {
         this.scheduledPlanType = newPlanType;
+        this.proratedChargeAmount = null;
     }
 
     public UUID getId() {
@@ -74,6 +103,10 @@ public class Subscription {
 
     public PlanType getScheduledPlanType() {
         return scheduledPlanType;
+    }
+
+    public BigDecimal getProratedChargeAmount() {
+        return proratedChargeAmount;
     }
 
 }

@@ -27,12 +27,13 @@ class ChangeSubscriptionPlanServiceTest {
     @BeforeEach
     void setUp() {
         subscriptionRepository = mock(SubscriptionRepository.class);
-        sut = new ChangeSubscriptionPlanService(subscriptionRepository);
 
         Clock fixedClock = Clock.fixed(
                 Instant.parse("2026-04-16T00:00:00Z"),
                 ZoneId.of("UTC")
         );
+
+        sut = new ChangeSubscriptionPlanService(subscriptionRepository, fixedClock);
 
     }
 
@@ -161,7 +162,7 @@ class ChangeSubscriptionPlanServiceTest {
                 new BillingPeriod(LocalDate.now(), LocalDate.now().plusMonths(1))
         );
 
-        subscription.changePlan(PlanType.BASIC);
+        subscription.changePlan(PlanType.BASIC, LocalDate.now());
 
         when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
 
