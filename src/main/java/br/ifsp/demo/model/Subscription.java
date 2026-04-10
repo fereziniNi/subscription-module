@@ -25,6 +25,10 @@ public class Subscription {
     }
 
     public void changePlan(PlanType newPlanType) {
+        if (this.planType == newPlanType) {
+            throw new IllegalArgumentException("Plan already contracted");
+        }
+
         if (newPlanType.ordinal() > this.planType.ordinal()) {
             this.planType = newPlanType;
             this.scheduledPlanType = null;
