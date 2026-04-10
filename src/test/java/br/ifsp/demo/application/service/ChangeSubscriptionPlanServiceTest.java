@@ -2,6 +2,7 @@ package br.ifsp.demo.application.service;
 
 import br.ifsp.demo.model.*;
 import br.ifsp.demo.repository.SubscriptionRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -16,12 +17,20 @@ import static org.mockito.Mockito.*;
 
 class ChangeSubscriptionPlanServiceTest {
 
+
+    private SubscriptionRepository subscriptionRepository;
+    private ChangeSubscriptionPlanService sut;
+
+    @BeforeEach
+    void setUp() {
+        subscriptionRepository = mock(SubscriptionRepository.class);
+        sut = new ChangeSubscriptionPlanService(subscriptionRepository);
+    }
+
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldChangeCurrentPlanImmediatelyWhenSubscriptionIsActiveAndUpgradeFromBasicToPlusIsRequested() {
-        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
-        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
 
         UUID subscriptionId = UUID.randomUUID();
         Subscription subscription = new Subscription(
@@ -44,9 +53,6 @@ class ChangeSubscriptionPlanServiceTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldChangeCurrentPlanImmediatelyWhenSubscriptionIsActiveAndUpgradeFromPlusToProIsRequested() {
-        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
-        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
-
         UUID subscriptionId = UUID.randomUUID();
         Subscription subscription = new Subscription(
                 UUID.randomUUID(),
@@ -69,9 +75,6 @@ class ChangeSubscriptionPlanServiceTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldKeepCurrentPlanAndScheduleNewPlanForNextCycleWhenSubscriptionIsActiveAndDowngradeFromProToPlusIsRequested() {
-        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
-        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
-
         UUID subscriptionId = UUID.randomUUID();
         Subscription subscription = new Subscription(
                 UUID.randomUUID(),
@@ -94,9 +97,6 @@ class ChangeSubscriptionPlanServiceTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldKeepCurrentPlanAndScheduleNewPlanForNextCycleWhenSubscriptionIsActiveAndDowngradeFromPlusToBasicIsRequested() {
-        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
-        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
-
         UUID subscriptionId = UUID.randomUUID();
         Subscription subscription = new Subscription(
                 UUID.randomUUID(),
@@ -120,9 +120,6 @@ class ChangeSubscriptionPlanServiceTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldThrowErrorWhenRequestedPlanIsTheSameAsCurrentPlan() {
-        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
-        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
-
         UUID subscriptionId = UUID.randomUUID();
         Subscription subscription = new Subscription(
                 UUID.randomUUID(),
@@ -145,9 +142,6 @@ class ChangeSubscriptionPlanServiceTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldRemoveScheduledDowngradeAndChangeCurrentPlanImmediatelyWhenUpgradeToProIsRequested() {
-        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
-        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
-
         UUID subscriptionId = UUID.randomUUID();
         Subscription subscription = new Subscription(
                 UUID.randomUUID(),
@@ -173,9 +167,6 @@ class ChangeSubscriptionPlanServiceTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldThrowErrorWhenChangingPlanOfCancelledSubscription() {
-        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
-        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
-
         UUID subscriptionId = UUID.randomUUID();
         Subscription subscription = new Subscription(
                 UUID.randomUUID(),
@@ -200,9 +191,6 @@ class ChangeSubscriptionPlanServiceTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void shouldThrowErrorWhenChangingPlanOfSuspendedSubscription() {
-        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
-        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
-
         UUID subscriptionId = UUID.randomUUID();
         Subscription subscription = new Subscription(
                 UUID.randomUUID(),
@@ -221,8 +209,5 @@ class ChangeSubscriptionPlanServiceTest {
 
         verify(subscriptionRepository, never()).save(any());
     }
-
-
-
 
 }

@@ -24,7 +24,6 @@ import static org.mockito.Mockito.*;
 @Tag("UnitTest")
 @Tag("TDD")
 class CreateSubscriptionServiceTest {
-
     private final LocalDate fixedDate = LocalDate.of(2026, 4, 6);
     private final Clock fixedClock = Clock.fixed(
             fixedDate.atStartOfDay(ZoneId.systemDefault()).toInstant(),
