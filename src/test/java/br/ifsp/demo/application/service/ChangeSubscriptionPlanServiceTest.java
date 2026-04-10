@@ -89,6 +89,31 @@ class ChangeSubscriptionPlanServiceTest {
         assertThat(updatedSubscription.getScheduledPlanType()).isEqualTo(PlanType.PLUS);
         verify(subscriptionRepository).save(subscription);
     }
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldKeepCurrentPlanAndScheduleNewPlanForNextCycleWhenSubscriptionIsActiveAndDowngradeFromPlusToBasicIsRequested() {
+        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
+        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
+
+        UUID subscriptionId = UUID.randomUUID();
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.PLUS,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("49.90"),
+                new BillingPeriod(LocalDate.now(), LocalDate.now().plusMonths(1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription updatedSubscription = sut.changePlan(subscriptionId, PlanType.BASIC);
+
+        assertThat(updatedSubscription.getPlanType()).isEqualTo(PlanType.PLUS);
+        assertThat(updatedSubscription.getScheduledPlanType()).isEqualTo(PlanType.BASIC);
+        verify(subscriptionRepository).save(subscription);
+    }
 
 
 
