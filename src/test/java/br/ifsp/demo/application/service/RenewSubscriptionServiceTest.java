@@ -58,4 +58,30 @@ public class RenewSubscriptionServiceTest {
         assertThat(renewedSubscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 1));
         verify(subscriptionRepository).save(subscription);
     }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldRenewYearlySubscriptionWithApprovedPaymentAndApplyAnnualDiscount() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.PLUS,
+                BillingCycle.YEARLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("359.28"),
+                new BillingPeriod(LocalDate.of(2025, 5, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription renewedSubscription = sut.renew(subscriptionId, true);
+
+        assertThat(renewedSubscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(renewedSubscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
+        assertThat(renewedSubscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2027, 5, 1));
+        assertThat(renewedSubscription.getAmount()).isEqualByComparingTo("359.28");
+        verify(subscriptionRepository).save(subscription);
+    }
 }
