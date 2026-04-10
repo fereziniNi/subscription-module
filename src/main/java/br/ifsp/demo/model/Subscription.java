@@ -16,7 +16,7 @@ public class Subscription {
     private BigDecimal proratedChargeAmount;
     private final BillingCycle billingCycle;
     private SubscriptionStatus status;
-    private final BigDecimal amount;
+    private BigDecimal amount;
     private BillingPeriod billingPeriod;
 
 
@@ -78,16 +78,27 @@ public class Subscription {
             throw new IllegalStateException("Early renewal");
         }
 
-        if (paymentApproved) {
-            LocalDate newStartDate = this.billingPeriod.getEndDate();
-            LocalDate newEndDate = newStartDate.plusMonths(1);
-            this.billingPeriod = new BillingPeriod(newStartDate, newEndDate);
+        if (!paymentApproved) {
+            this.status = SubscriptionStatus.SUSPENDED;
+            return;
+        }
+
+        LocalDate newStartDate = this.billingPeriod.getEndDate();
+
+        if (this.billingCycle == BillingCycle.MONTHLY) {
+            this.billingPeriod = new BillingPeriod(newStartDate, newStartDate.plusMonths(1));
+            this.amount = this.planType.getMonthlyPrice();
             this.status = SubscriptionStatus.ACTIVE;
             return;
         }
 
-        this.status = SubscriptionStatus.SUSPENDED;
+        this.billingPeriod = new BillingPeriod(newStartDate, newStartDate.plusYears(1));
+        this.amount = this.planType.getMonthlyPrice()
+                .multiply(new BigDecimal("12"))
+                .multiply(new BigDecimal("0.60"));
+        this.status = SubscriptionStatus.ACTIVE;
     }
+
 
     public UUID getId() {
         return id;
