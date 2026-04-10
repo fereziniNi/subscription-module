@@ -169,6 +169,32 @@ class ChangeSubscriptionPlanServiceTest {
         verify(subscriptionRepository).save(subscription);
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldThrowErrorWhenChangingPlanOfCancelledSubscription() {
+        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
+        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
+
+        UUID subscriptionId = UUID.randomUUID();
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.PLUS,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.CANCELLED,
+                new BigDecimal("49.90"),
+                new BillingPeriod(LocalDate.now(), LocalDate.now().plusMonths(1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        assertThatThrownBy(() -> sut.changePlan(subscriptionId, PlanType.PRO))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Inactive subscription");
+
+        verify(subscriptionRepository, never()).save(any());
+    }
+
 
 
 
