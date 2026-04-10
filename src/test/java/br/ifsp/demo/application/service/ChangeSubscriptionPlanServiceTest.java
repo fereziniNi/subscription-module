@@ -38,4 +38,33 @@ class ChangeSubscriptionPlanServiceTest {
 
         assertThat(updatedSubscription.getPlanType()).isEqualTo(PlanType.PLUS);
     }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldChangeCurrentPlanImmediatelyWhenSubscriptionIsActiveAndUpgradeFromPlusToProIsRequested() {
+        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
+        ChangeSubscriptionPlanService sut = new ChangeSubscriptionPlanService(subscriptionRepository);
+
+        UUID subscriptionId = UUID.randomUUID();
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.PLUS,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("49.90"),
+                new BillingPeriod(LocalDate.now(), LocalDate.now().plusMonths(1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription updatedSubscription = sut.changePlan(subscriptionId, PlanType.PRO);
+
+        assertThat(updatedSubscription.getPlanType()).isEqualTo(PlanType.PRO);
+        verify(subscriptionRepository).save(subscription);
+    }
+
+
+
+
 }
