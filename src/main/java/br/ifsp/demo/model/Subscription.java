@@ -25,6 +25,9 @@ public class Subscription {
     }
 
     public void changePlan(PlanType newPlanType) {
+        if (this.status == SubscriptionStatus.SUSPENDED) {
+            throw new IllegalStateException("Suspended subscription");
+        }
         if (this.status == SubscriptionStatus.CANCELLED) {
             throw new IllegalStateException("Inactive subscription");
         }
