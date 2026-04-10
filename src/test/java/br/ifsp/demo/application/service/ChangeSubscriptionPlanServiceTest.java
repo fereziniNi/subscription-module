@@ -263,4 +263,30 @@ class ChangeSubscriptionPlanServiceTest {
 
         Subscription updatedSubscription = sut.changePlan(subscriptionId, PlanType.PRO);
     }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldScheduleDowngradeWithoutImmediateChargeWhenChangingFromProToPlus() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.PRO,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("79.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription updatedSubscription = sut.changePlan(subscriptionId, PlanType.PLUS);
+
+        assertThat(updatedSubscription.getPlanType()).isEqualTo(PlanType.PRO);
+        assertThat(updatedSubscription.getScheduledPlanType()).isEqualTo(PlanType.PLUS);
+        assertThat(updatedSubscription.getProratedChargeAmount()).isNull();
+        verify(subscriptionRepository).save(subscription);
+    }
+
 }
