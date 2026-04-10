@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 public class RenewSubscriptionServiceTest {
 
     private SubscriptionRepository subscriptionRepository;
-    private ChangeSubscriptionPlanService sut;
+    private RenewSubscriptionService sut;
 
     @BeforeEach
     void setUp() {

@@ -15,9 +15,9 @@ public class Subscription {
     private PlanType scheduledPlanType;
     private BigDecimal proratedChargeAmount;
     private final BillingCycle billingCycle;
-    private final SubscriptionStatus status;
+    private SubscriptionStatus status;
     private final BigDecimal amount;
-    private final BillingPeriod billingPeriod;
+    private BillingPeriod billingPeriod;
 
 
     public Subscription(UUID customerId, PlanType planType, BillingCycle billingCycle, SubscriptionStatus status, BigDecimal amount,  BillingPeriod billingPeriod) {
@@ -71,6 +71,22 @@ public class Subscription {
     private void scheduleDowngrade(PlanType newPlanType) {
         this.scheduledPlanType = newPlanType;
         this.proratedChargeAmount = null;
+    }
+
+    public void renew(boolean paymentApproved, LocalDate currentDate) {
+        if (!currentDate.isAfter(this.billingPeriod.getEndDate())) {
+            throw new IllegalStateException("Early renewal");
+        }
+
+        if (paymentApproved) {
+            LocalDate newStartDate = this.billingPeriod.getEndDate();
+            LocalDate newEndDate = newStartDate.plusMonths(1);
+            this.billingPeriod = new BillingPeriod(newStartDate, newEndDate);
+            this.status = SubscriptionStatus.ACTIVE;
+            return;
+        }
+
+        this.status = SubscriptionStatus.SUSPENDED;
     }
 
     public UUID getId() {
