@@ -34,4 +34,14 @@ public class CancelSubscriptionService {
 
         return subscription;
     }
+
+    public Subscription reverseScheduledCancellation(UUID subscriptionId) {
+        Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
+
+        subscription.reverseScheduledCancellation();
+        subscriptionRepository.save(subscription);
+
+        return subscription;
+    }
 }

@@ -123,6 +123,10 @@ public class Subscription {
         this.cancellationScheduled = true;
     }
 
+    public void reverseScheduledCancellation() {
+        this.cancellationScheduled = false;
+    }
+
 
     public UUID getId() {
         return id;
