@@ -113,6 +113,10 @@ public class Subscription {
         this.status = SubscriptionStatus.ACTIVE;
     }
 
+    public void cancelImmediately() {
+        this.status = SubscriptionStatus.CANCELLED;
+    }
+
 
     public UUID getId() {
         return id;

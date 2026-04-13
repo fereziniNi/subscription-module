@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 public class CancelSubscriptionServiceTest {
 
     private SubscriptionRepository subscriptionRepository;
-    private RenewSubscriptionService sut;
+    private CancelSubscriptionService sut;
 
     @BeforeEach
     void setUp() {
@@ -31,7 +31,7 @@ public class CancelSubscriptionServiceTest {
                 Instant.parse("2026-05-02T00:00:00Z"),
                 ZoneId.of("UTC")
         );
-        sut = new RenewSubscriptionService(subscriptionRepository, fixedClock);
+        sut = new CancelSubscriptionService(subscriptionRepository);
     }
 
     @Test
