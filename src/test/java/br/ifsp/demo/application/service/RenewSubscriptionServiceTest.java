@@ -162,6 +162,33 @@ public class RenewSubscriptionServiceTest {
 
         verify(subscriptionRepository, never()).save(any());
     }
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldStartNewCycleWithScheduledPlanWhenRenewalIsApproved() {
+        UUID subscriptionId = UUID.randomUUID();
+        LocalDate currentDate = LocalDate.of(2026, 5, 2);
 
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.PRO,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("79.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        subscription.changePlan(PlanType.PLUS, currentDate);
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription renewedSubscription = sut.renew(subscriptionId, true);
+
+        assertThat(renewedSubscription.getPlanType()).isEqualTo(PlanType.PLUS);
+        assertThat(renewedSubscription.getScheduledPlanType()).isNull();
+        assertThat(renewedSubscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
+        assertThat(renewedSubscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 1));
+        verify(subscriptionRepository).save(subscription);
+    }
 
 }
