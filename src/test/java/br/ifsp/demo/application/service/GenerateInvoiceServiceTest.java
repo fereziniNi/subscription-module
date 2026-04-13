@@ -51,4 +51,29 @@ class GenerateInvoiceServiceTest {
         assertThat(generatedInvoice.getAmount()).isEqualByComparingTo("29.90");
         verify(invoiceRepository).save(any(Invoice.class));
     }
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldGenerateYearlyInvoiceWithAnnualDiscountForPlusPlan() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.PLUS,
+                BillingCycle.YEARLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("359.28"),
+                new BillingPeriod(LocalDate.of(2026, 6, 1), LocalDate.of(2027, 6, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+        when(invoiceRepository.existsBySubscriptionIdAndPeriod(subscriptionId, subscription.getBillingPeriod())).thenReturn(false);
+
+        Invoice generatedInvoice = sut.generate(subscriptionId);
+
+        assertThat(generatedInvoice.getAmount()).isEqualByComparingTo("359.28");
+        verify(invoiceRepository).save(any(Invoice.class));
+    }
+
+
 }
