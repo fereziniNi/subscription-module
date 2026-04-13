@@ -74,9 +74,15 @@ public class Subscription {
     }
 
     public void renew(boolean paymentApproved, LocalDate currentDate) {
+
         if (this.status == SubscriptionStatus.CANCELLED) {
             throw new IllegalStateException("Cancelled subscription");
         }
+
+        if (this.status == SubscriptionStatus.SUSPENDED) {
+            throw new IllegalStateException("Suspended subscription");
+        }
+
         if (!currentDate.isAfter(this.billingPeriod.getEndDate())) {
             throw new IllegalStateException("Early renewal");
         }
