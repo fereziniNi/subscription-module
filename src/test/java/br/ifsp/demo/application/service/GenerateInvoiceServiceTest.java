@@ -157,4 +157,28 @@ class GenerateInvoiceServiceTest {
         verify(invoiceRepository, never()).save(any());
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldThrowErrorWhenGeneratingInvoiceForSuspendedSubscription() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.SUSPENDED,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 6, 1), LocalDate.of(2026, 7, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        assertThatThrownBy(() -> sut.generate(subscriptionId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Suspended subscription");
+
+        verify(invoiceRepository, never()).save(any());
+    }
+
 }
