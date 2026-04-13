@@ -223,5 +223,31 @@ class ListCustomerSubscriptionsServiceTest {
         assertThat(subscriptions).containsExactly(newerSubscription, olderSubscription);
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldKeepCancelledSubscriptionVisibleInCustomerHistory() {
+        UUID customerId = UUID.randomUUID();
+
+        Subscription cancelledSubscription = new Subscription(
+                customerId,
+                PlanType.PLUS,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.CANCELLED,
+                new BigDecimal("49.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(customerAccountGateway.existsById(customerId)).thenReturn(true);
+        when(subscriptionRepository.findByCustomerId(customerId))
+                .thenReturn(List.of(cancelledSubscription));
+
+        List<Subscription> subscriptions = sut.findByCustomerId(customerId);
+
+        assertThat(subscriptions).hasSize(1);
+        assertThat(subscriptions.get(0).getStatus()).isEqualTo(SubscriptionStatus.CANCELLED);
+        assertThat(subscriptions).containsExactly(cancelledSubscription);
+    }
+
 
 }
