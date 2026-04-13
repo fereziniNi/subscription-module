@@ -154,4 +154,5 @@ public class CancelSubscriptionServiceTest {
 
         verify(subscriptionRepository, never()).save(any());
     }
+
 }

@@ -116,6 +116,10 @@ public class Subscription {
     }
 
     public void cancelImmediately() {
+        if (this.status == SubscriptionStatus.CANCELLED) {
+            throw new IllegalStateException("Cancelled subscription");
+        }
+
         this.status = SubscriptionStatus.CANCELLED;
     }
 
