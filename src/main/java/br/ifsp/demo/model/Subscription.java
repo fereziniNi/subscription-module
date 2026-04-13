@@ -19,6 +19,8 @@ public class Subscription {
     private BigDecimal amount;
     private BillingPeriod billingPeriod;
 
+    private boolean cancellationScheduled;
+
 
     public Subscription(UUID customerId, PlanType planType, BillingCycle billingCycle, SubscriptionStatus status, BigDecimal amount,  BillingPeriod billingPeriod) {
         this.id = UUID.randomUUID();
@@ -117,6 +119,10 @@ public class Subscription {
         this.status = SubscriptionStatus.CANCELLED;
     }
 
+    public void cancelAtPeriodEnd() {
+        this.cancellationScheduled = true;
+    }
+
 
     public UUID getId() {
         return id;
@@ -152,6 +158,10 @@ public class Subscription {
 
     public BigDecimal getProratedChargeAmount() {
         return proratedChargeAmount;
+    }
+
+    public boolean isCancellationScheduled() {
+        return cancellationScheduled;
     }
 
 }

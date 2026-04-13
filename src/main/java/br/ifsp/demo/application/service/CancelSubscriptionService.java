@@ -24,4 +24,14 @@ public class CancelSubscriptionService {
 
         return subscription;
     }
+
+    public Subscription cancelAtPeriodEnd(UUID subscriptionId) {
+        Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
+
+        subscription.cancelAtPeriodEnd();
+        subscriptionRepository.save(subscription);
+
+        return subscription;
+    }
 }
