@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 
@@ -113,5 +114,29 @@ public class RenewSubscriptionServiceTest {
         assertThat(renewedSubscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 4, 1));
         assertThat(renewedSubscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 5, 1));
         verify(subscriptionRepository).save(subscription);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldThrowErrorWhenRenewalIsRequestedBeforePeriodExpiration() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        assertThatThrownBy(() -> sut.renew(subscriptionId, true))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Early renewal");
+
+        verify(subscriptionRepository, never()).save(any());
     }
 }
