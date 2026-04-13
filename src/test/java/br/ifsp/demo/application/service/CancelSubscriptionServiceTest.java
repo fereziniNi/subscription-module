@@ -130,4 +130,28 @@ public class CancelSubscriptionServiceTest {
         assertThat(updatedSubscription.getStatus()).isEqualTo(SubscriptionStatus.CANCELLED);
         verify(subscriptionRepository).save(subscription);
     }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldThrowErrorWhenCancellingAlreadyCancelledSubscription() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.CANCELLED,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        assertThatThrownBy(() -> sut.cancelImmediately(subscriptionId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Cancelled subscription");
+
+        verify(subscriptionRepository, never()).save(any());
+    }
 }
