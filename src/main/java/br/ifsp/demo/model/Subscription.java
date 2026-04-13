@@ -86,6 +86,11 @@ public class Subscription {
             return;
         }
 
+        if (this.scheduledPlanType != null) {
+            this.planType = this.scheduledPlanType;
+            this.scheduledPlanType = null;
+        }
+
         LocalDate newStartDate = this.billingPeriod.getEndDate();
 
         if (this.billingCycle == BillingCycle.MONTHLY) {
