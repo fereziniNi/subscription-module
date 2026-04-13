@@ -249,5 +249,32 @@ class ListCustomerSubscriptionsServiceTest {
         assertThat(subscriptions).containsExactly(cancelledSubscription);
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldReturnSuspendedSubscriptionWithItsLastContractedPlan() {
+        UUID customerId = UUID.randomUUID();
+
+        Subscription suspendedSubscription = new Subscription(
+                customerId,
+                PlanType.PRO,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.SUSPENDED,
+                new BigDecimal("79.90"),
+                new BillingPeriod(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 1))
+        );
+
+        when(customerAccountGateway.existsById(customerId)).thenReturn(true);
+        when(subscriptionRepository.findByCustomerId(customerId))
+                .thenReturn(List.of(suspendedSubscription));
+
+        List<Subscription> subscriptions = sut.findByCustomerId(customerId);
+
+        assertThat(subscriptions).hasSize(1);
+        assertThat(subscriptions.get(0).getStatus()).isEqualTo(SubscriptionStatus.SUSPENDED);
+        assertThat(subscriptions.get(0).getPlanType()).isEqualTo(PlanType.PRO);
+        assertThat(subscriptions).containsExactly(suspendedSubscription);
+    }
+
 
 }
