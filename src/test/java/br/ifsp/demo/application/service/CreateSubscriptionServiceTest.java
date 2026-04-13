@@ -132,4 +132,45 @@ class CreateSubscriptionServiceTest {
         verify(subscriptionRepository).existsActiveByCustomerId(customerId);
         verify(subscriptionRepository, never()).save(any());
     }
+
+    @Test
+    void shouldCreateSubscriptionWithPlusYearlyPlanAndAnnualDiscount() {
+        UUID customerId = UUID.randomUUID();
+
+        JpaUserRepository userRepository = mock(JpaUserRepository.class);
+        when(userRepository.findById(customerId)).thenReturn(Optional.of(buildUser(customerId)));
+
+        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
+
+        CreateSubscriptionService service = createService(userRepository, subscriptionRepository);
+
+        Subscription subscription = service.create(customerId, PlanType.PLUS, BillingCycle.YEARLY);
+
+        assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(subscription.getPlanType()).isEqualTo(PlanType.PLUS);
+        assertThat(subscription.getBillingCycle()).isEqualTo(BillingCycle.YEARLY);
+        assertThat(subscription.getAmount()).isEqualByComparingTo("359.28");
+
+        verify(userRepository).findById(customerId);
+        verify(subscriptionRepository).save(subscription);
+    }
+
+    @Test
+    void shouldProvideUniqueIdentifierWhenSubscriptionIsCreatedSuccessfully() {
+        UUID customerId = UUID.randomUUID();
+
+        JpaUserRepository userRepository = mock(JpaUserRepository.class);
+        when(userRepository.findById(customerId)).thenReturn(Optional.of(buildUser(customerId)));
+
+        SubscriptionRepository subscriptionRepository = mock(SubscriptionRepository.class);
+
+        CreateSubscriptionService service = createService(userRepository, subscriptionRepository);
+
+        Subscription subscription = service.create(customerId, PlanType.BASIC, BillingCycle.MONTHLY);
+
+        assertThat(subscription.getId()).isNotNull();
+
+        verify(userRepository).findById(customerId);
+        verify(subscriptionRepository).save(subscription);
+    }
 }
