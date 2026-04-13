@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class GenerateInvoiceServiceTest {
@@ -102,6 +103,35 @@ class GenerateInvoiceServiceTest {
         assertThat(generatedInvoice.getId()).isNotNull();
         assertThat(generatedInvoice.getPeriod()).isEqualTo(billingPeriod);
         verify(invoiceRepository).save(any(Invoice.class));
+    }
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldThrowErrorWhenGeneratingDuplicateInvoiceForCurrentPeriod() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        BillingPeriod billingPeriod = new BillingPeriod(
+                LocalDate.of(2026, 6, 1),
+                LocalDate.of(2026, 7, 1)
+        );
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                billingPeriod
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+        when(invoiceRepository.existsBySubscriptionIdAndPeriod(subscriptionId, billingPeriod)).thenReturn(true);
+
+        assertThatThrownBy(() -> sut.generate(subscriptionId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Duplicate invoice");
+
+        verify(invoiceRepository, never()).save(any());
     }
 
 
