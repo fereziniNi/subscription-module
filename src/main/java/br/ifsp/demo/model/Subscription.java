@@ -20,6 +20,7 @@ public class Subscription {
     private BillingPeriod billingPeriod;
 
     private boolean cancellationScheduled;
+    private final LocalDate createdAt;
 
 
     public Subscription(UUID customerId, PlanType planType, BillingCycle billingCycle, SubscriptionStatus status, BigDecimal amount,  BillingPeriod billingPeriod) {
@@ -30,6 +31,26 @@ public class Subscription {
         this.status = status;
         this.amount = amount;
         this.billingPeriod = billingPeriod;
+        this.createdAt = LocalDate.now();
+    }
+
+    public Subscription(
+            UUID customerId,
+            PlanType planType,
+            BillingCycle billingCycle,
+            SubscriptionStatus status,
+            BigDecimal amount,
+            BillingPeriod billingPeriod,
+            LocalDate createdAt
+    ) {
+        this.id = UUID.randomUUID();
+        this.customerId = customerId;
+        this.planType = planType;
+        this.billingCycle = billingCycle;
+        this.status = status;
+        this.amount = amount;
+        this.billingPeriod = billingPeriod;
+        this.createdAt = createdAt;
     }
 
     public void changePlan(PlanType newPlanType, LocalDate currentDate) {
@@ -178,4 +199,7 @@ public class Subscription {
         return cancellationScheduled;
     }
 
+    public LocalDate getCreatedAt() {
+        return createdAt;
+    }
 }

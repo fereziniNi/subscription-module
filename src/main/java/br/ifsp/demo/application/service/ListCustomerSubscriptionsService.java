@@ -6,6 +6,7 @@ import br.ifsp.demo.model.SubscriptionStatus;
 import br.ifsp.demo.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +39,16 @@ public class ListCustomerSubscriptionsService {
 
         return subscriptionRepository.findByCustomerId(customerId).stream()
                 .filter(subscription -> subscription.getStatus() == status)
+                .toList();
+    }
+
+    public List<Subscription> findByCustomerIdOrderByCreatedAtDesc(UUID customerId) {
+        if (!customerAccountGateway.existsById(customerId)) {
+            throw new IllegalArgumentException("Customer does not exist");
+        }
+
+        return subscriptionRepository.findByCustomerId(customerId).stream()
+                .sorted(Comparator.comparing(Subscription::getCreatedAt).reversed())
                 .toList();
     }
 }
