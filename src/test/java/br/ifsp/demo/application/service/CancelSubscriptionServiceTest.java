@@ -56,4 +56,27 @@ public class CancelSubscriptionServiceTest {
         assertThat(cancelledSubscription.getStatus()).isEqualTo(SubscriptionStatus.CANCELLED);
         verify(subscriptionRepository).save(subscription);
     }
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldScheduleCancellationAndKeepSubscriptionActiveUntilEndOfCurrentPeriod() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription updatedSubscription = sut.cancelAtPeriodEnd(subscriptionId);
+
+        assertThat(updatedSubscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(updatedSubscription.isCancellationScheduled()).isTrue();
+        verify(subscriptionRepository).save(subscription);
+    }
 }
