@@ -2,6 +2,7 @@ package br.ifsp.demo.application.service;
 
 import br.ifsp.demo.application.gateway.CustomerAccountGateway;
 import br.ifsp.demo.model.Subscription;
+import br.ifsp.demo.model.SubscriptionStatus;
 import br.ifsp.demo.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 
@@ -28,5 +29,15 @@ public class ListCustomerSubscriptionsService {
         }
 
         return subscriptionRepository.findByCustomerId(customerId);
+    }
+
+    public List<Subscription> findByCustomerIdAndStatus(UUID customerId, SubscriptionStatus status) {
+        if (!customerAccountGateway.existsById(customerId)) {
+            throw new IllegalArgumentException("Customer does not exist");
+        }
+
+        return subscriptionRepository.findByCustomerId(customerId).stream()
+                .filter(subscription -> subscription.getStatus() == status)
+                .toList();
     }
 }
