@@ -32,6 +32,10 @@ public class GenerateInvoiceService {
             throw new IllegalStateException("Cancelled subscription");
         }
 
+        if (subscription.getStatus() == SubscriptionStatus.SUSPENDED) {
+            throw new IllegalStateException("Suspended subscription");
+        }
+
         Invoice invoice = new Invoice(
                 subscriptionId,
                 subscription.getBillingPeriod(),
