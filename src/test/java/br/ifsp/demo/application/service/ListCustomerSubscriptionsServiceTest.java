@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class ListCustomerSubscriptionsServiceTest {
@@ -127,5 +128,19 @@ class ListCustomerSubscriptionsServiceTest {
         assertThat(subscriptions.get(2).getStatus()).isEqualTo(SubscriptionStatus.SUSPENDED);
         assertThat(subscriptions.get(2).getPlanType()).isEqualTo(PlanType.PRO);
         assertThat(subscriptions.get(2).getBillingCycle()).isEqualTo(BillingCycle.MONTHLY);
+    }
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldThrowErrorWhenCustomerDoesNotExist() {
+        UUID customerId = UUID.randomUUID();
+
+        when(customerAccountGateway.existsById(customerId)).thenReturn(false);
+
+        assertThatThrownBy(() -> sut.findByCustomerId(customerId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Customer does not exist");
+
+        verify(subscriptionRepository, never()).findByCustomerId(any());
     }
 }
