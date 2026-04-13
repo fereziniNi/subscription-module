@@ -127,6 +127,12 @@ public class Subscription {
         this.cancellationScheduled = false;
     }
 
+    public void processCycleEnding(LocalDate currentDate) {
+        if (this.cancellationScheduled && currentDate.isAfter(this.billingPeriod.getEndDate())) {
+            this.status = SubscriptionStatus.CANCELLED;
+        }
+    }
+
 
     public UUID getId() {
         return id;

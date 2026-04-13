@@ -28,7 +28,7 @@ public class CancelSubscriptionServiceTest {
     void setUp() {
         subscriptionRepository = mock(SubscriptionRepository.class);
         Clock fixedClock = Clock.fixed(
-                Instant.parse("2026-05-02T00:00:00Z"),
+                Instant.parse("2026-06-02T00:00:00Z"),
                 ZoneId.of("UTC")
         );
         sut = new CancelSubscriptionService(subscriptionRepository, fixedClock);
