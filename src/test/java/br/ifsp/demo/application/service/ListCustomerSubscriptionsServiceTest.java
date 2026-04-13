@@ -187,4 +187,41 @@ class ListCustomerSubscriptionsServiceTest {
         assertThat(subscriptions.get(0).getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
         assertThat(subscriptions.get(0)).isEqualTo(activeSubscription);
     }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldReturnSubscriptionsOrderedByCreationDateFromNewestToOldest() {
+        UUID customerId = UUID.randomUUID();
+
+        Subscription olderSubscription = new Subscription(
+                customerId,
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1)),
+                LocalDate.of(2026, 4, 1)
+        );
+
+        Subscription newerSubscription = new Subscription(
+                customerId,
+                PlanType.PLUS,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.CANCELLED,
+                new BigDecimal("49.90"),
+                new BillingPeriod(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 1)),
+                LocalDate.of(2026, 5, 1)
+        );
+
+        when(customerAccountGateway.existsById(customerId)).thenReturn(true);
+        when(subscriptionRepository.findByCustomerId(customerId))
+                .thenReturn(List.of(olderSubscription, newerSubscription));
+
+        List<Subscription> subscriptions = sut.findByCustomerIdOrderByCreatedAtDesc(customerId);
+
+        assertThat(subscriptions).containsExactly(newerSubscription, olderSubscription);
+    }
+
+
 }
