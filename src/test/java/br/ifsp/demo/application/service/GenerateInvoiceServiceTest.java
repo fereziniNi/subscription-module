@@ -181,4 +181,28 @@ class GenerateInvoiceServiceTest {
         verify(invoiceRepository, never()).save(any());
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldGenerateInvoiceWithPlusPlanAmountAfterImmediateUpgradeFromBasicToPlus() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.PLUS,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("49.90"),
+                new BillingPeriod(LocalDate.of(2026, 7, 1), LocalDate.of(2026, 8, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+        when(invoiceRepository.existsBySubscriptionIdAndPeriod(subscriptionId, subscription.getBillingPeriod())).thenReturn(false);
+
+        Invoice generatedInvoice = sut.generate(subscriptionId);
+
+        assertThat(generatedInvoice.getAmount()).isEqualByComparingTo("49.90");
+        verify(invoiceRepository).save(any(Invoice.class));
+    }
+
 }
