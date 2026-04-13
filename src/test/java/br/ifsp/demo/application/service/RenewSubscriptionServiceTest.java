@@ -241,4 +241,28 @@ public class RenewSubscriptionServiceTest {
         verify(subscriptionRepository, never()).save(any());
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldThrowErrorWhenRenewingPreviouslyCancelledSubscription() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.CANCELLED,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        assertThatThrownBy(() -> sut.renew(subscriptionId, true))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Cancelled subscription");
+
+        verify(subscriptionRepository, never()).save(any());
+    }
+
 }
