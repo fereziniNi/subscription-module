@@ -74,4 +74,58 @@ class ListCustomerSubscriptionsServiceTest {
 
         assertThat(subscriptions).isEmpty();
     }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldReturnSubscriptionsWithCorrectStatusPlanAndBillingCycle() {
+        UUID customerId = UUID.randomUUID();
+
+        Subscription activeSubscription = new Subscription(
+                customerId,
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 6, 1), LocalDate.of(2026, 7, 1))
+        );
+
+        Subscription cancelledSubscription = new Subscription(
+                customerId,
+                PlanType.PLUS,
+                BillingCycle.YEARLY,
+                SubscriptionStatus.CANCELLED,
+                new BigDecimal("359.28"),
+                new BillingPeriod(LocalDate.of(2025, 6, 1), LocalDate.of(2026, 6, 1))
+        );
+
+        Subscription suspendedSubscription = new Subscription(
+                customerId,
+                PlanType.PRO,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.SUSPENDED,
+                new BigDecimal("79.90"),
+                new BillingPeriod(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 1))
+        );
+
+        when(customerAccountGateway.existsById(customerId)).thenReturn(true);
+        when(subscriptionRepository.findByCustomerId(customerId))
+                .thenReturn(List.of(activeSubscription, cancelledSubscription, suspendedSubscription));
+
+        List<Subscription> subscriptions = sut.findByCustomerId(customerId);
+
+        assertThat(subscriptions).hasSize(3);
+
+        assertThat(subscriptions.get(0).getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(subscriptions.get(0).getPlanType()).isEqualTo(PlanType.BASIC);
+        assertThat(subscriptions.get(0).getBillingCycle()).isEqualTo(BillingCycle.MONTHLY);
+
+        assertThat(subscriptions.get(1).getStatus()).isEqualTo(SubscriptionStatus.CANCELLED);
+        assertThat(subscriptions.get(1).getPlanType()).isEqualTo(PlanType.PLUS);
+        assertThat(subscriptions.get(1).getBillingCycle()).isEqualTo(BillingCycle.YEARLY);
+
+        assertThat(subscriptions.get(2).getStatus()).isEqualTo(SubscriptionStatus.SUSPENDED);
+        assertThat(subscriptions.get(2).getPlanType()).isEqualTo(PlanType.PRO);
+        assertThat(subscriptions.get(2).getBillingCycle()).isEqualTo(BillingCycle.MONTHLY);
+    }
 }
