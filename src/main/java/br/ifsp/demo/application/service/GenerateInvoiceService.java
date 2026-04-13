@@ -2,6 +2,7 @@ package br.ifsp.demo.application.service;
 
 import br.ifsp.demo.model.Invoice;
 import br.ifsp.demo.model.Subscription;
+import br.ifsp.demo.model.SubscriptionStatus;
 import br.ifsp.demo.repository.InvoiceRepository;
 import br.ifsp.demo.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,10 @@ public class GenerateInvoiceService {
 
         if (invoiceRepository.existsBySubscriptionIdAndPeriod(subscriptionId, subscription.getBillingPeriod())) {
             throw new IllegalStateException("Duplicate invoice");
+        }
+
+        if (subscription.getStatus() == SubscriptionStatus.CANCELLED) {
+            throw new IllegalStateException("Cancelled subscription");
         }
 
         Invoice invoice = new Invoice(
