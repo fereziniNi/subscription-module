@@ -61,4 +61,17 @@ class ListCustomerSubscriptionsServiceTest {
         assertThat(subscriptions).hasSize(2);
         assertThat(subscriptions).containsExactly(firstSubscription, secondSubscription);
     }
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldReturnEmptyListWhenCustomerHasNoSubscriptions() {
+        UUID customerId = UUID.randomUUID();
+
+        when(customerAccountGateway.existsById(customerId)).thenReturn(true);
+        when(subscriptionRepository.findByCustomerId(customerId)).thenReturn(List.of());
+
+        List<Subscription> subscriptions = sut.findByCustomerId(customerId);
+
+        assertThat(subscriptions).isEmpty();
+    }
 }
