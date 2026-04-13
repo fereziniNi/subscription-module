@@ -155,4 +155,27 @@ public class CancelSubscriptionServiceTest {
         verify(subscriptionRepository, never()).save(any());
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldCancelSubscriptionImmediatelyWhenItIsSuspended() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.SUSPENDED,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription cancelledSubscription = sut.cancelImmediately(subscriptionId);
+
+        assertThat(cancelledSubscription.getStatus()).isEqualTo(SubscriptionStatus.CANCELLED);
+        verify(subscriptionRepository).save(subscription);
+    }
+
 }
