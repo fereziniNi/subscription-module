@@ -3,6 +3,7 @@ package br.ifsp.demo.controller;
 import br.ifsp.demo.application.service.*;
 import br.ifsp.demo.controller.dto.ChangeSubscriptionPlanRequest;
 import br.ifsp.demo.controller.dto.CreateSubscriptionRequest;
+import br.ifsp.demo.controller.dto.RenewSubscriptionRequest;
 import br.ifsp.demo.controller.dto.SubscriptionResponse;
 import br.ifsp.demo.model.Subscription;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,19 +25,24 @@ public class SubscriptionController {
     private final ListCustomerSubscriptionsService listCustomerSubscriptionsService;
     private final ChangeSubscriptionPlanService changeSubscriptionPlanService;
     private final CancelSubscriptionService cancelSubscriptionService;
+    private final RenewSubscriptionService renewSubscriptionService;
+
 
     public SubscriptionController(
             CreateSubscriptionService createSubscriptionService,
             GetSubscriptionService getSubscriptionService,
             ListCustomerSubscriptionsService listCustomerSubscriptionsService,
             ChangeSubscriptionPlanService changeSubscriptionPlanService,
-            CancelSubscriptionService cancelSubscriptionService
+            CancelSubscriptionService cancelSubscriptionService,
+            RenewSubscriptionService renewSubscriptionService
     ) {
         this.createSubscriptionService = createSubscriptionService;
         this.getSubscriptionService = getSubscriptionService;
         this.listCustomerSubscriptionsService = listCustomerSubscriptionsService;
         this.changeSubscriptionPlanService = changeSubscriptionPlanService;
         this.cancelSubscriptionService = cancelSubscriptionService;
+        this.renewSubscriptionService = renewSubscriptionService;
+
     }
 
     @Operation(
@@ -126,6 +132,21 @@ public class SubscriptionController {
 
         return ResponseEntity.ok(SubscriptionResponse.from(subscription));
     }
+
+    @Operation(
+            summary = "Renew subscription",
+            description = "Renews a subscription when the current billing period has expired."
+    )
+    @PostMapping("/{id}/renew")
+    public ResponseEntity<SubscriptionResponse> renew(
+            @PathVariable UUID id,
+            @RequestBody RenewSubscriptionRequest request
+    ) {
+        Subscription subscription = renewSubscriptionService.renew(id, request.paymentApproved());
+
+        return ResponseEntity.ok(SubscriptionResponse.from(subscription));
+    }
+
 
 
 
