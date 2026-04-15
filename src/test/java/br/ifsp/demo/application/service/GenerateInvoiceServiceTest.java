@@ -6,6 +6,8 @@ import br.ifsp.demo.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -227,6 +229,37 @@ class GenerateInvoiceServiceTest {
 
         assertThat(generatedInvoice.getAmount()).isEqualByComparingTo("29.90");
         verify(invoiceRepository).save(any(Invoice.class));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "CANCELLED, Cancelled subscription",
+            "SUSPENDED, Suspended subscription"
+    })
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldBlockInvoiceGenerationForInvalidSubscriptionStatuses(
+            SubscriptionStatus status,
+            String expectedMessage
+    ) {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                status,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 6, 1), LocalDate.of(2026, 7, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        assertThatThrownBy(() -> sut.generate(subscriptionId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage(expectedMessage);
+
+        verify(invoiceRepository, never()).save(any());
     }
 
 }

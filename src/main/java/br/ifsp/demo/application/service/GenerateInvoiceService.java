@@ -45,4 +45,6 @@ public class GenerateInvoiceService {
         invoiceRepository.save(invoice);
         return invoice;
     }
+
+
 }
