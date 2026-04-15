@@ -163,6 +163,40 @@ public class CancelSubscriptionServiceTest {
         verify(subscriptionRepository).save(subscription);
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldKeepSubscriptionActiveWhenProcessingScheduledCancellationExactlyAtPeriodEndDate() {
+        subscriptionRepository = mock(SubscriptionRepository.class);
+
+        Clock boundaryClock = Clock.fixed(
+                Instant.parse("2026-06-01T00:00:00Z"),
+                ZoneId.of("UTC")
+        );
+
+        sut = new CancelSubscriptionService(subscriptionRepository, boundaryClock);
+
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 1))
+        );
+
+        subscription.cancelAtPeriodEnd();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription updatedSubscription = sut.processCycleEnding(subscriptionId);
+
+        assertThat(updatedSubscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(updatedSubscription.isCancellationScheduled()).isTrue();
+        verify(subscriptionRepository).save(subscription);
+    }
 
 
 
