@@ -1,9 +1,6 @@
 package br.ifsp.demo.controller;
 
-import br.ifsp.demo.application.service.ChangeSubscriptionPlanService;
-import br.ifsp.demo.application.service.CreateSubscriptionService;
-import br.ifsp.demo.application.service.GetSubscriptionService;
-import br.ifsp.demo.application.service.ListCustomerSubscriptionsService;
+import br.ifsp.demo.application.service.*;
 import br.ifsp.demo.controller.dto.ChangeSubscriptionPlanRequest;
 import br.ifsp.demo.controller.dto.CreateSubscriptionRequest;
 import br.ifsp.demo.controller.dto.SubscriptionResponse;
@@ -26,17 +23,20 @@ public class SubscriptionController {
     private final GetSubscriptionService getSubscriptionService;
     private final ListCustomerSubscriptionsService listCustomerSubscriptionsService;
     private final ChangeSubscriptionPlanService changeSubscriptionPlanService;
+    private final CancelSubscriptionService cancelSubscriptionService;
 
     public SubscriptionController(
             CreateSubscriptionService createSubscriptionService,
             GetSubscriptionService getSubscriptionService,
             ListCustomerSubscriptionsService listCustomerSubscriptionsService,
-            ChangeSubscriptionPlanService changeSubscriptionPlanService
+            ChangeSubscriptionPlanService changeSubscriptionPlanService,
+            CancelSubscriptionService cancelSubscriptionService
     ) {
         this.createSubscriptionService = createSubscriptionService;
         this.getSubscriptionService = getSubscriptionService;
         this.listCustomerSubscriptionsService = listCustomerSubscriptionsService;
         this.changeSubscriptionPlanService = changeSubscriptionPlanService;
+        this.cancelSubscriptionService = cancelSubscriptionService;
     }
 
     @Operation(
@@ -93,6 +93,40 @@ public class SubscriptionController {
 
         return ResponseEntity.ok(SubscriptionResponse.from(subscription));
     }
+
+    @Operation(
+            summary = "Cancel subscription immediately",
+            description = "Cancels an active or suspended subscription immediately."
+    )
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<SubscriptionResponse> cancelImmediately(@PathVariable UUID id) {
+        Subscription subscription = cancelSubscriptionService.cancelImmediately(id);
+
+        return ResponseEntity.ok(SubscriptionResponse.from(subscription));
+    }
+
+    @Operation(
+            summary = "Schedule subscription cancellation",
+            description = "Schedules the subscription cancellation for the end of the current billing period."
+    )
+    @PostMapping("/{id}/cancel-at-period-end")
+    public ResponseEntity<SubscriptionResponse> cancelAtPeriodEnd(@PathVariable UUID id) {
+        Subscription subscription = cancelSubscriptionService.cancelAtPeriodEnd(id);
+
+        return ResponseEntity.ok(SubscriptionResponse.from(subscription));
+    }
+
+    @Operation(
+            summary = "Reverse scheduled cancellation",
+            description = "Removes a scheduled cancellation from the subscription."
+    )
+    @PostMapping("/{id}/reverse-cancellation")
+    public ResponseEntity<SubscriptionResponse> reverseScheduledCancellation(@PathVariable UUID id) {
+        Subscription subscription = cancelSubscriptionService.reverseScheduledCancellation(id);
+
+        return ResponseEntity.ok(SubscriptionResponse.from(subscription));
+    }
+
 
 
 
