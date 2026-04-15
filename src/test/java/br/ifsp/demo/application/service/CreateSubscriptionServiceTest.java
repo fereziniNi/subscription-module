@@ -178,4 +178,27 @@ class CreateSubscriptionServiceTest {
         verify(subscriptionRepository).save(subscription);
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "MONTHLY, 2026-05-06",
+            "YEARLY, 2027-04-06"
+    })
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldDefineBillingPeriodEndDateAccordingToBillingCycle(
+            BillingCycle billingCycle,
+            LocalDate expectedEndDate
+    ) {
+        UUID customerId = UUID.randomUUID();
+        when(userRepository.findById(customerId)).thenReturn(Optional.of(buildUser(customerId)));
+
+        Subscription subscription = service.create(customerId, PlanType.BASIC, billingCycle);
+
+        assertThat(subscription.getBillingPeriod().getStartDate()).isEqualTo(fixedDate);
+        assertThat(subscription.getBillingPeriod().getEndDate()).isEqualTo(expectedEndDate);
+
+        verify(userRepository).findById(customerId);
+        verify(subscriptionRepository).save(subscription);
+    }
+
 }
