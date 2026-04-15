@@ -5,6 +5,8 @@ import br.ifsp.demo.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -34,28 +36,7 @@ public class CancelSubscriptionServiceTest {
         sut = new CancelSubscriptionService(subscriptionRepository, fixedClock);
     }
 
-    @Test
-    @Tag("UnitTest")
-    @Tag("TDD")
-    void shouldCancelSubscriptionImmediatelyWhenItIsActive() {
-        UUID subscriptionId = UUID.randomUUID();
 
-        Subscription subscription = new Subscription(
-                UUID.randomUUID(),
-                PlanType.BASIC,
-                BillingCycle.MONTHLY,
-                SubscriptionStatus.ACTIVE,
-                new BigDecimal("29.90"),
-                new BillingPeriod(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 1))
-        );
-
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
-
-        Subscription cancelledSubscription = sut.cancelImmediately(subscriptionId);
-
-        assertThat(cancelledSubscription.getStatus()).isEqualTo(SubscriptionStatus.CANCELLED);
-        verify(subscriptionRepository).save(subscription);
-    }
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
@@ -155,17 +136,21 @@ public class CancelSubscriptionServiceTest {
         verify(subscriptionRepository, never()).save(any());
     }
 
-    @Test
+    @ParameterizedTest
+    @CsvSource({
+            "ACTIVE",
+            "SUSPENDED"
+    })
     @Tag("UnitTest")
     @Tag("TDD")
-    void shouldCancelSubscriptionImmediatelyWhenItIsSuspended() {
+    void shouldCancelSubscriptionImmediatelyWhenStatusAllowsCancellation(SubscriptionStatus status) {
         UUID subscriptionId = UUID.randomUUID();
 
         Subscription subscription = new Subscription(
                 UUID.randomUUID(),
                 PlanType.BASIC,
                 BillingCycle.MONTHLY,
-                SubscriptionStatus.SUSPENDED,
+                status,
                 new BigDecimal("29.90"),
                 new BillingPeriod(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 1))
         );
@@ -177,6 +162,7 @@ public class CancelSubscriptionServiceTest {
         assertThat(cancelledSubscription.getStatus()).isEqualTo(SubscriptionStatus.CANCELLED);
         verify(subscriptionRepository).save(subscription);
     }
+
 
 
 
