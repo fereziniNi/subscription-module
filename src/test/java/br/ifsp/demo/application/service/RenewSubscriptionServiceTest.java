@@ -5,6 +5,8 @@ import br.ifsp.demo.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -261,6 +263,37 @@ public class RenewSubscriptionServiceTest {
         assertThatThrownBy(() -> sut.renew(subscriptionId, true))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Cancelled subscription");
+
+        verify(subscriptionRepository, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "CANCELLED, Cancelled subscription",
+            "SUSPENDED, Suspended subscription"
+    })
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldBlockRenewalForInvalidSubscriptionStatuses(
+            SubscriptionStatus status,
+            String expectedMessage
+    ) {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                status,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        assertThatThrownBy(() -> sut.renew(subscriptionId, true))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage(expectedMessage);
 
         verify(subscriptionRepository, never()).save(any());
     }
