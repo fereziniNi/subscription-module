@@ -1,10 +1,8 @@
 package br.ifsp.demo.controller;
 
 import br.ifsp.demo.application.service.*;
-import br.ifsp.demo.controller.dto.ChangeSubscriptionPlanRequest;
-import br.ifsp.demo.controller.dto.CreateSubscriptionRequest;
-import br.ifsp.demo.controller.dto.RenewSubscriptionRequest;
-import br.ifsp.demo.controller.dto.SubscriptionResponse;
+import br.ifsp.demo.controller.dto.*;
+import br.ifsp.demo.model.Invoice;
 import br.ifsp.demo.model.Subscription;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +24,7 @@ public class SubscriptionController {
     private final ChangeSubscriptionPlanService changeSubscriptionPlanService;
     private final CancelSubscriptionService cancelSubscriptionService;
     private final RenewSubscriptionService renewSubscriptionService;
+    private final GenerateInvoiceService generateInvoiceService;
 
 
     public SubscriptionController(
@@ -34,7 +33,8 @@ public class SubscriptionController {
             ListCustomerSubscriptionsService listCustomerSubscriptionsService,
             ChangeSubscriptionPlanService changeSubscriptionPlanService,
             CancelSubscriptionService cancelSubscriptionService,
-            RenewSubscriptionService renewSubscriptionService
+            RenewSubscriptionService renewSubscriptionService,
+            GenerateInvoiceService generateInvoiceService
     ) {
         this.createSubscriptionService = createSubscriptionService;
         this.getSubscriptionService = getSubscriptionService;
@@ -42,6 +42,7 @@ public class SubscriptionController {
         this.changeSubscriptionPlanService = changeSubscriptionPlanService;
         this.cancelSubscriptionService = cancelSubscriptionService;
         this.renewSubscriptionService = renewSubscriptionService;
+        this.generateInvoiceService = generateInvoiceService;
 
     }
 
@@ -147,6 +148,17 @@ public class SubscriptionController {
         return ResponseEntity.ok(SubscriptionResponse.from(subscription));
     }
 
+    @Operation(
+            summary = "Generate subscription invoice",
+            description = "Generates an invoice for the current billing period of a subscription."
+    )
+    @PostMapping("/{id}/invoices")
+    public ResponseEntity<InvoiceResponse> generateInvoice(@PathVariable UUID id) {
+        Invoice invoice = generateInvoiceService.generate(id);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(InvoiceResponse.from(invoice));
+    }
 
 
 
