@@ -356,7 +356,45 @@ class ChangeSubscriptionPlanServiceTest {
         verify(subscriptionRepository).save(subscription);
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "2026-04-30T00:00:00Z, 0.67",
+            "2026-04-29T00:00:00Z, 1.33"
+    })
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldCalculateProratedChargeNearCycleEnd(
+            String instantText,
+            BigDecimal expectedProratedAmount
+    ) {
+        subscriptionRepository = mock(SubscriptionRepository.class);
 
+        Clock dynamicClock = Clock.fixed(
+                Instant.parse(instantText),
+                ZoneId.of("UTC")
+        );
+
+        sut = new ChangeSubscriptionPlanService(subscriptionRepository, dynamicClock);
+
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription updatedSubscription = sut.changePlan(subscriptionId, PlanType.PLUS);
+
+        assertThat(updatedSubscription.getPlanType()).isEqualTo(PlanType.PLUS);
+        assertThat(updatedSubscription.getProratedChargeAmount()).isEqualByComparingTo(expectedProratedAmount);
+        verify(subscriptionRepository).save(subscription);
+    }
 
 
 }
