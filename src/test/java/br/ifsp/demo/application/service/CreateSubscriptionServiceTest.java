@@ -11,7 +11,10 @@ import br.ifsp.demo.security.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -145,4 +148,34 @@ class CreateSubscriptionServiceTest {
                 .role(Role.USER)
                 .build();
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "BASIC, MONTHLY, 29.90",
+            "PLUS, MONTHLY, 49.90",
+            "PRO, MONTHLY, 79.90",
+            "BASIC, YEARLY, 215.28",
+            "PLUS, YEARLY, 359.28",
+            "PRO, YEARLY, 575.28"
+    })
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldCalculateSubscriptionAmountForEachPlanAndBillingCycle(
+            PlanType planType,
+            BillingCycle billingCycle,
+            BigDecimal expectedAmount
+    ) {
+        UUID customerId = UUID.randomUUID();
+        when(userRepository.findById(customerId)).thenReturn(Optional.of(buildUser(customerId)));
+
+        Subscription subscription = service.create(customerId, planType, billingCycle);
+
+        assertThat(subscription.getPlanType()).isEqualTo(planType);
+        assertThat(subscription.getBillingCycle()).isEqualTo(billingCycle);
+        assertThat(subscription.getAmount()).isEqualByComparingTo(expectedAmount);
+
+        verify(userRepository).findById(customerId);
+        verify(subscriptionRepository).save(subscription);
+    }
+
 }
