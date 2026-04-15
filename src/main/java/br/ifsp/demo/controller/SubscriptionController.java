@@ -1,8 +1,10 @@
 package br.ifsp.demo.controller;
 
+import br.ifsp.demo.application.service.ChangeSubscriptionPlanService;
 import br.ifsp.demo.application.service.CreateSubscriptionService;
 import br.ifsp.demo.application.service.GetSubscriptionService;
 import br.ifsp.demo.application.service.ListCustomerSubscriptionsService;
+import br.ifsp.demo.controller.dto.ChangeSubscriptionPlanRequest;
 import br.ifsp.demo.controller.dto.CreateSubscriptionRequest;
 import br.ifsp.demo.controller.dto.SubscriptionResponse;
 import br.ifsp.demo.model.Subscription;
@@ -23,15 +25,18 @@ public class SubscriptionController {
     private final CreateSubscriptionService createSubscriptionService;
     private final GetSubscriptionService getSubscriptionService;
     private final ListCustomerSubscriptionsService listCustomerSubscriptionsService;
+    private final ChangeSubscriptionPlanService changeSubscriptionPlanService;
 
     public SubscriptionController(
             CreateSubscriptionService createSubscriptionService,
             GetSubscriptionService getSubscriptionService,
-            ListCustomerSubscriptionsService listCustomerSubscriptionsService
+            ListCustomerSubscriptionsService listCustomerSubscriptionsService,
+            ChangeSubscriptionPlanService changeSubscriptionPlanService
     ) {
         this.createSubscriptionService = createSubscriptionService;
         this.getSubscriptionService = getSubscriptionService;
         this.listCustomerSubscriptionsService = listCustomerSubscriptionsService;
+        this.changeSubscriptionPlanService = changeSubscriptionPlanService;
     }
 
     @Operation(
@@ -74,6 +79,21 @@ public class SubscriptionController {
 
         return ResponseEntity.ok(subscriptions);
     }
+
+    @Operation(
+            summary = "Change subscription plan",
+            description = "Changes a subscription plan immediately for upgrades or schedules the change for downgrades."
+    )
+    @PatchMapping("/{id}/plan")
+    public ResponseEntity<SubscriptionResponse> changePlan(
+            @PathVariable UUID id,
+            @RequestBody ChangeSubscriptionPlanRequest request
+    ) {
+        Subscription subscription = changeSubscriptionPlanService.changePlan(id, request.planType());
+
+        return ResponseEntity.ok(SubscriptionResponse.from(subscription));
+    }
+
 
 
 }
