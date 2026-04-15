@@ -141,29 +141,7 @@ public class RenewSubscriptionServiceTest {
 
         verify(subscriptionRepository, never()).save(any());
     }
-    @Test
-    @Tag("UnitTest")
-    @Tag("TDD")
-    void shouldThrowErrorWhenRenewingCancelledSubscription() {
-        UUID subscriptionId = UUID.randomUUID();
 
-        Subscription subscription = new Subscription(
-                UUID.randomUUID(),
-                PlanType.BASIC,
-                BillingCycle.MONTHLY,
-                SubscriptionStatus.CANCELLED,
-                new BigDecimal("29.90"),
-                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
-        );
-
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
-
-        assertThatThrownBy(() -> sut.renew(subscriptionId, true))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Cancelled subscription");
-
-        verify(subscriptionRepository, never()).save(any());
-    }
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
@@ -219,62 +197,14 @@ public class RenewSubscriptionServiceTest {
         verify(subscriptionRepository).save(subscription);
     }
 
-    @Test
-    @Tag("UnitTest")
-    @Tag("TDD")
-    void shouldThrowErrorWhenRenewingSuspendedSubscription() {
-        UUID subscriptionId = UUID.randomUUID();
-
-        Subscription subscription = new Subscription(
-                UUID.randomUUID(),
-                PlanType.BASIC,
-                BillingCycle.MONTHLY,
-                SubscriptionStatus.SUSPENDED,
-                new BigDecimal("29.90"),
-                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
-        );
-
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
-
-        assertThatThrownBy(() -> sut.renew(subscriptionId, true))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Suspended subscription");
-
-        verify(subscriptionRepository, never()).save(any());
-    }
-
-    @Test
-    @Tag("UnitTest")
-    @Tag("TDD")
-    void shouldThrowErrorWhenRenewingPreviouslyCancelledSubscription() {
-        UUID subscriptionId = UUID.randomUUID();
-
-        Subscription subscription = new Subscription(
-                UUID.randomUUID(),
-                PlanType.BASIC,
-                BillingCycle.MONTHLY,
-                SubscriptionStatus.CANCELLED,
-                new BigDecimal("29.90"),
-                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
-        );
-
-        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
-
-        assertThatThrownBy(() -> sut.renew(subscriptionId, true))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Cancelled subscription");
-
-        verify(subscriptionRepository, never()).save(any());
-    }
-
     @ParameterizedTest
     @CsvSource({
             "CANCELLED, Cancelled subscription",
             "SUSPENDED, Suspended subscription"
     })
     @Tag("UnitTest")
-    @Tag("Functional")
-    void shouldBlockRenewalForInvalidSubscriptionStatuses(
+    @Tag("TDD")
+    void shouldThrowErrorWhenRenewingInvalidSubscriptionStatus(
             SubscriptionStatus status,
             String expectedMessage
     ) {
@@ -297,6 +227,9 @@ public class RenewSubscriptionServiceTest {
 
         verify(subscriptionRepository, never()).save(any());
     }
+
+
+
 
     @Test
     @Tag("UnitTest")
