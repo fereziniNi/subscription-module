@@ -5,6 +5,8 @@ import br.ifsp.demo.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -260,8 +262,6 @@ class ChangeSubscriptionPlanServiceTest {
         );
 
         when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
-
-        Subscription updatedSubscription = sut.changePlan(subscriptionId, PlanType.PRO);
     }
 
     @Test
@@ -313,5 +313,48 @@ class ChangeSubscriptionPlanServiceTest {
         assertThat(updatedSubscription.getProratedChargeAmount()).isNull();
         verify(subscriptionRepository).save(subscription);
     }
+
+    // Functional tests
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "BASIC, PRO, PRO, , false",
+            "PRO, BASIC, PRO, BASIC, true"
+    }, nullValues = "")
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldHandleEquivalentPlanChangeCases(
+            PlanType currentPlan,
+            PlanType requestedPlan,
+            PlanType expectedCurrentPlan,
+            PlanType expectedScheduledPlan,
+            boolean shouldHaveScheduledPlan
+    ) {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                currentPlan,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                currentPlan.getMonthlyPrice(),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription updatedSubscription = sut.changePlan(subscriptionId, requestedPlan);
+
+        assertThat(updatedSubscription.getPlanType()).isEqualTo(expectedCurrentPlan);
+
+        if (shouldHaveScheduledPlan) {
+            assertThat(updatedSubscription.getScheduledPlanType()).isEqualTo(expectedScheduledPlan);
+        } else {
+            assertThat(updatedSubscription.getScheduledPlanType()).isNull();
+        }
+
+        verify(subscriptionRepository).save(subscription);
+    }
+
 
 }
