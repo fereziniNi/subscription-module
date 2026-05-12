@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -335,5 +336,26 @@ class SubscriptionTest {
         subscription.processCycleEnding(LocalDate.of(2026, 5, 31));
 
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+    }
+
+    @Test
+    void shouldReturnConstructorValuesThroughGetters() {
+        UUID customerId = java.util.UUID.randomUUID();
+        LocalDate createdAt = LocalDate.of(2026, 4, 1);
+
+        Subscription subscription = new Subscription(
+                customerId,
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1)),
+                createdAt
+        );
+
+        assertThat(subscription.getId()).isNotNull();
+        assertThat(subscription.getCustomerId()).isEqualTo(customerId);
+        assertThat(subscription.getBillingCycle()).isEqualTo(BillingCycle.MONTHLY);
+        assertThat(subscription.getCreatedAt()).isEqualTo(createdAt);
     }
 }
