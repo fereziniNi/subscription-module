@@ -325,5 +325,35 @@ class ListCustomerSubscriptionsServiceTest {
         assertThat(subscriptions).allMatch(subscription -> subscription.getStatus() == requestedStatus);
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void shouldThrowErrorWhenFilteringSubscriptionsByStatusForNonexistentCustomer() {
+        UUID customerId = UUID.randomUUID();
+
+        when(customerAccountGateway.existsById(customerId)).thenReturn(false);
+
+        assertThatThrownBy(() -> sut.findByCustomerIdAndStatus(customerId, SubscriptionStatus.ACTIVE))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Customer does not exist");
+
+        verify(subscriptionRepository, never()).findByCustomerId(any());
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void shouldThrowErrorWhenOrderingSubscriptionsByCreationDateForNonexistentCustomer() {
+        UUID customerId = UUID.randomUUID();
+
+        when(customerAccountGateway.existsById(customerId)).thenReturn(false);
+
+        assertThatThrownBy(() -> sut.findByCustomerIdOrderByCreatedAtDesc(customerId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Customer does not exist");
+
+        verify(subscriptionRepository, never()).findByCustomerId(any());
+    }
+
 
 }
