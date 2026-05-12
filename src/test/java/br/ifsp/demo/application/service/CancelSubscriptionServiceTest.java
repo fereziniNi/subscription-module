@@ -198,6 +198,66 @@ public class CancelSubscriptionServiceTest {
         verify(subscriptionRepository).save(subscription);
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void shouldThrowErrorWhenCancellingImmediatelyNonexistentSubscription() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sut.cancelImmediately(subscriptionId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Subscription not found");
+
+        verify(subscriptionRepository, never()).save(any());
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void shouldThrowErrorWhenSchedulingCancellationForNonexistentSubscription() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sut.cancelAtPeriodEnd(subscriptionId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Subscription not found");
+
+        verify(subscriptionRepository, never()).save(any());
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void shouldThrowErrorWhenReversingScheduledCancellationForNonexistentSubscription() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sut.reverseScheduledCancellation(subscriptionId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Subscription not found");
+
+        verify(subscriptionRepository, never()).save(any());
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void shouldThrowErrorWhenProcessingCycleEndingForNonexistentSubscription() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sut.processCycleEnding(subscriptionId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Subscription not found");
+
+        verify(subscriptionRepository, never()).save(any());
+    }
+
 
 
 }
