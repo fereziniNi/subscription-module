@@ -163,7 +163,7 @@
                 </dependencies>
                 <configuration>
                     <targetClasses>
-                        <param>br.ifsp.demo.model.*</param>
+                        <param>br.ifsp.demo.application.service.*</param>
                     </targetClasses>
                     <targetTests>
                         <param>br.ifsp.demo.*Test</param>
