@@ -1,0 +1,3 @@
+| Classe | Linha | ID do mutante | Justificativa |
+|--------|------:|--------------|---------------|
+| Subscription|    68 | changePlan - changed conditional boundary | O mutante altera `>` para `>=` na comparação entre planos, mas o caso de igualdade já é tratado anteriormente pela validação `if (this.planType == newPlanType)`, que lança exceção e impede a execução desse ramo. Portanto, a mutação não altera o comportamento do programa e é equivalente ao código original. |

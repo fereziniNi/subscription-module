@@ -85,7 +85,7 @@
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-suite-engine</artifactId>
+            <artifactId>junit-platform-suite</artifactId>
             <version>1.11.4</version>
             <scope>test</scope>
         </dependency>
@@ -162,8 +162,12 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <targetClasses></targetClasses>
-                    <targetTests></targetTests>
+                    <targetClasses>
+                        <param>br.ifsp.demo.model.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>br.ifsp.demo.*Test</param>
+                    </targetTests>
                 </configuration>
             </plugin>
             <plugin>
