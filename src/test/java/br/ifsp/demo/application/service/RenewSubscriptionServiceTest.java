@@ -298,4 +298,19 @@ public class RenewSubscriptionServiceTest {
         verify(subscriptionRepository).save(subscription);
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void shouldThrowErrorWhenRenewingNonexistentSubscription() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sut.renew(subscriptionId, true))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Subscription not found");
+
+        verify(subscriptionRepository, never()).save(any());
+    }
+
 }
