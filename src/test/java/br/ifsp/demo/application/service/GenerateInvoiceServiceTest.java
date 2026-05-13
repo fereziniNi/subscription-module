@@ -262,4 +262,19 @@ class GenerateInvoiceServiceTest {
         verify(invoiceRepository, never()).save(any());
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void shouldThrowErrorWhenGeneratingInvoiceForNonexistentSubscription() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sut.generate(subscriptionId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Subscription not found");
+
+        verify(invoiceRepository, never()).save(any());
+    }
+
 }
