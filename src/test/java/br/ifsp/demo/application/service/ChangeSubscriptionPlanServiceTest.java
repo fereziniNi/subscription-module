@@ -396,5 +396,19 @@ class ChangeSubscriptionPlanServiceTest {
         verify(subscriptionRepository).save(subscription);
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void shouldThrowErrorWhenChangingPlanOfNonexistentSubscription() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sut.changePlan(subscriptionId, PlanType.PLUS))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Subscription not found");
+
+        verify(subscriptionRepository, never()).save(any());
+    }
 
 }
