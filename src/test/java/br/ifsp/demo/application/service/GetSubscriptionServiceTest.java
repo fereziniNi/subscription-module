@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -46,5 +47,18 @@ class GetSubscriptionServiceTest {
         Subscription foundSubscription = sut.getById(subscriptionId);
 
         assertThat(foundSubscription.getStatus()).isEqualTo(SubscriptionStatus.CANCELLED);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void shouldThrowErrorWhenGettingNonexistentSubscription() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sut.getById(subscriptionId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Subscription not found");
     }
 }
