@@ -60,6 +60,7 @@ class CreateSubscriptionServiceTest {
         assertThat(subscription.getPlanType()).isEqualTo(PlanType.BASIC);
         assertThat(subscription.getBillingCycle()).isEqualTo(BillingCycle.MONTHLY);
         assertThat(subscription.getAmount()).isEqualByComparingTo("29.90");
+        assertThat(subscription.getCreatedAt()).isEqualTo(fixedDate);
 
         verify(userRepository).findById(customerId);
         verify(subscriptionRepository).save(subscription);

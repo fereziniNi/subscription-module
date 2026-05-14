@@ -41,4 +41,9 @@ public class InMemorySubscriptionRepository implements SubscriptionRepository {
                 .filter(subscription -> subscription.getCustomerId().equals(customerId))
                 .toList();
     }
+
+    @Override
+    public List<Subscription> findAll() {
+        return List.copyOf(subscriptions.values());
+    }
 }

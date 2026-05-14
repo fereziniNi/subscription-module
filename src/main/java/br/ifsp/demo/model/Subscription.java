@@ -102,11 +102,7 @@ public class Subscription {
             throw new IllegalStateException("Cancelled subscription");
         }
 
-        if (this.status == SubscriptionStatus.SUSPENDED) {
-            throw new IllegalStateException("Suspended subscription");
-        }
-
-        if (!currentDate.isAfter(this.billingPeriod.getEndDate())) {
+        if (currentDate.isBefore(this.billingPeriod.getEndDate())) {
             throw new IllegalStateException("Early renewal");
         }
 
@@ -153,9 +149,29 @@ public class Subscription {
     }
 
     public void processCycleEnding(LocalDate currentDate) {
-        if (this.cancellationScheduled && currentDate.isAfter(this.billingPeriod.getEndDate())) {
-            this.status = SubscriptionStatus.CANCELLED;
+        processExpiration(currentDate);
+    }
+
+    public boolean processExpiration(LocalDate currentDate) {
+        if (currentDate.isBefore(this.billingPeriod.getEndDate())) {
+            return false;
         }
+
+        if (this.status == SubscriptionStatus.CANCELLED) {
+            return false;
+        }
+
+        if (this.cancellationScheduled) {
+            this.status = SubscriptionStatus.CANCELLED;
+            return true;
+        }
+
+        if (this.status == SubscriptionStatus.ACTIVE) {
+            this.status = SubscriptionStatus.SUSPENDED;
+            return true;
+        }
+
+        return false;
     }
 
 

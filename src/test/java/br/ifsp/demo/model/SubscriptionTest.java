@@ -171,7 +171,7 @@ class SubscriptionTest {
     }
 
     @Test
-    void shouldThrowErrorWhenRenewingSuspendedSubscription() {
+    void shouldReactivateSuspendedSubscriptionWhenRenewingWithApprovedPayment() {
         Subscription subscription = new Subscription(
                 java.util.UUID.randomUUID(),
                 PlanType.BASIC,
@@ -181,9 +181,11 @@ class SubscriptionTest {
                 new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
         );
 
-        assertThatThrownBy(() -> subscription.renew(true, LocalDate.of(2026, 5, 2)))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Suspended subscription");
+        subscription.renew(true, LocalDate.of(2026, 5, 2));
+
+        assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(subscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
+        assertThat(subscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 1));
     }
 
     @Test
@@ -306,7 +308,7 @@ class SubscriptionTest {
     }
 
     @Test
-    void shouldKeepSubscriptionActiveWhenCycleEndingWithoutScheduledCancellation() {
+    void shouldSuspendSubscriptionWhenCycleEndingWithoutScheduledCancellation() {
         Subscription subscription = new Subscription(
                 java.util.UUID.randomUUID(),
                 PlanType.BASIC,
@@ -318,7 +320,7 @@ class SubscriptionTest {
 
         subscription.processCycleEnding(LocalDate.of(2026, 6, 2));
 
-        assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.SUSPENDED);
     }
 
     @Test

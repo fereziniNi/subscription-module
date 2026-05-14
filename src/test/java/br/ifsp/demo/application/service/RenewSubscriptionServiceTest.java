@@ -199,8 +199,7 @@ public class RenewSubscriptionServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-            "CANCELLED, Cancelled subscription",
-            "SUSPENDED, Suspended subscription"
+            "CANCELLED, Cancelled subscription"
     })
     @Tag("UnitTest")
     @Tag("TDD")
@@ -228,13 +227,63 @@ public class RenewSubscriptionServiceTest {
         verify(subscriptionRepository, never()).save(any());
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldReactivateSuspendedSubscriptionWhenPaymentIsApproved() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.SUSPENDED,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription renewedSubscription = sut.renew(subscriptionId, true);
+
+        assertThat(renewedSubscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(renewedSubscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
+        assertThat(renewedSubscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 1));
+        verify(subscriptionRepository).save(subscription);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void shouldKeepSuspendedSubscriptionSuspendedWhenPaymentIsRejected() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.SUSPENDED,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription renewedSubscription = sut.renew(subscriptionId, false);
+
+        assertThat(renewedSubscription.getStatus()).isEqualTo(SubscriptionStatus.SUSPENDED);
+        assertThat(renewedSubscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 4, 1));
+        assertThat(renewedSubscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 5, 1));
+        verify(subscriptionRepository).save(subscription);
+    }
+
 
 
 
     @Test
     @Tag("UnitTest")
     @Tag("Functional")
-    void shouldBlockRenewalWhenCurrentDateIsExactlyThePeriodEndDate() {
+    void shouldAllowRenewalWhenCurrentDateIsExactlyThePeriodEndDate() {
         subscriptionRepository = mock(SubscriptionRepository.class);
 
         Clock boundaryClock = Clock.fixed(
@@ -257,11 +306,12 @@ public class RenewSubscriptionServiceTest {
 
         when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
 
-        assertThatThrownBy(() -> sut.renew(subscriptionId, true))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Early renewal");
+        Subscription renewedSubscription = sut.renew(subscriptionId, true);
 
-        verify(subscriptionRepository, never()).save(any());
+        assertThat(renewedSubscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(renewedSubscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
+        assertThat(renewedSubscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 1));
+        verify(subscriptionRepository).save(subscription);
     }
 
     @Test

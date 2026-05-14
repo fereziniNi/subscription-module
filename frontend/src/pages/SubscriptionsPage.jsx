@@ -9,6 +9,7 @@ import {
   renewSubscription,
 } from "../api/subscriptions";
 import { getAuthenticatedUserId } from "../api/me";
+import { advanceSimulatedTime, getSimulatedTime, resetSimulatedTime } from "../api/time";
 
 export default function SubscriptionsPage() {
   const navigate = useNavigate();
@@ -18,12 +19,21 @@ export default function SubscriptionsPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loadingUser, setLoadingUser] = useState(true);
+  const [currentDate, setCurrentDate] = useState("");
+  const [loadingTime, setLoadingTime] = useState(true);
 
   useEffect(() => {
     async function loadAuthenticatedUser() {
       try {
         const userId = await getAuthenticatedUserId();
         setCustomerId(userId);
+
+        try {
+          const data = await listSubscriptionsByCustomerId(userId);
+          setSubscriptions(data);
+        } catch (err) {
+          setError(err?.response?.data?.message || "Could not load subscriptions.");
+        }
       } catch (err) {
         setError(err?.response?.data?.message || "Could not identify authenticated user.");
       } finally {
@@ -34,71 +44,121 @@ export default function SubscriptionsPage() {
     loadAuthenticatedUser();
   }, []);
 
-  async function loadSubscriptions() {
-    if (!customerId) return;
+  useEffect(() => {
+    async function loadTime() {
+      try {
+        const data = await getSimulatedTime();
+        setCurrentDate(data.currentDate);
+      } catch (err) {
+        setError(err?.response?.data?.message || "Could not load simulated time.");
+      } finally {
+        setLoadingTime(false);
+      }
+    }
 
-    setError("");
-    setMessage("");
+    loadTime();
+  }, []);
+
+  async function loadSubscriptions({ clearMessage = true } = {}) {
+    if (!customerId) return;
 
     try {
       const data = await listSubscriptionsByCustomerId(customerId);
       setSubscriptions(data);
+      setError("");
+      if (clearMessage) {
+        setMessage("");
+      }
     } catch (err) {
       setError(err?.response?.data?.message || "Could not load subscriptions.");
     }
   }
 
-  useEffect(() => {
-    if (customerId) {
-      loadSubscriptions();
+  async function handleAdvanceTime(months) {
+    setError("");
+
+    try {
+      const data = await advanceSimulatedTime(months);
+      setCurrentDate(data.currentDate);
+      setMessage(`Simulated time advanced ${months} month${months > 1 ? "s" : ""}.`);
+      await loadSubscriptions({ clearMessage: false });
+    } catch (err) {
+      setError(err?.response?.data?.message || "Could not advance simulated time.");
     }
-  }, [customerId]);
+  }
+
+  async function handleResetTime() {
+    setError("");
+
+    try {
+      const data = await resetSimulatedTime();
+      setCurrentDate(data.currentDate);
+      setMessage("Simulated time reset.");
+      await loadSubscriptions({ clearMessage: false });
+    } catch (err) {
+      setError(err?.response?.data?.message || "Could not reset simulated time.");
+    }
+  }
 
   async function handleChangePlan(id, planType) {
+    setError("");
+
     try {
       const updated = await changeSubscriptionPlan(id, { planType });
       setMessage(`Plan updated for subscription ${updated.id}.`);
-      await loadSubscriptions();
+      await loadSubscriptions({ clearMessage: false });
     } catch (err) {
       setError(err?.response?.data?.message || "Could not change plan.");
     }
   }
 
-  async function handleRenew(id) {
+  async function handleRenew(id, paymentApproved) {
+    setError("");
+
     try {
-      await renewSubscription(id, { paymentApproved: true });
-      setMessage("Subscription renewed.");
-      await loadSubscriptions();
+      await renewSubscription(id, { paymentApproved });
+      setMessage(
+        paymentApproved
+          ? "Subscription renewed with approved payment."
+          : "Subscription suspended after rejected payment."
+      );
+      await loadSubscriptions({ clearMessage: false });
     } catch (err) {
       setError(err?.response?.data?.message || "Could not renew subscription.");
     }
   }
 
   async function handleCancel(id) {
+    setError("");
+
     try {
       await cancelSubscriptionImmediately(id);
       setMessage("Subscription cancelled.");
-      await loadSubscriptions();
+      await loadSubscriptions({ clearMessage: false });
     } catch (err) {
       setError(err?.response?.data?.message || "Could not cancel subscription.");
     }
   }
 
   async function handleScheduleCancel(id) {
+    setError("");
+
     try {
       await cancelSubscriptionAtPeriodEnd(id);
       setMessage("Cancellation scheduled.");
-      await loadSubscriptions();
+      await loadSubscriptions({ clearMessage: false });
     } catch (err) {
       setError(err?.response?.data?.message || "Could not schedule cancellation.");
     }
   }
 
   async function handleReverseCancel(id) {
+    setError("");
+
     try {
       await reverseScheduledCancellation(id);
       setMessage("Scheduled cancellation reversed.");
-      await loadSubscriptions();
+      await loadSubscriptions({ clearMessage: false });
     } catch (err) {
       setError(err?.response?.data?.message || "Could not reverse cancellation.");
     }
@@ -115,7 +175,27 @@ export default function SubscriptionsPage() {
           <>
             <input value={customerId} readOnly />
 
-            <button onClick={loadSubscriptions}>Refresh subscriptions</button>
+            <div
+              style={{
+                border: "1px solid #ddd",
+                borderRadius: 8,
+                padding: 12,
+                marginTop: 16,
+              }}
+            >
+              <h2 style={{ fontSize: 18, marginTop: 0 }}>Painel de tempo</h2>
+              <p>
+                <strong>Current simulated date:</strong>{" "}
+                {loadingTime ? "Loading..." : currentDate}
+              </p>
+              <div style={{ display: "grid", gap: 8 }}>
+                <button onClick={() => handleAdvanceTime(1)}>Advance 1 month</button>
+                <button onClick={() => handleAdvanceTime(12)}>Advance 12 months</button>
+                <button onClick={handleResetTime}>Reset time</button>
+              </div>
+            </div>
+
+            <button onClick={() => loadSubscriptions()}>Refresh subscriptions</button>
 
             {error && <p className="error">{error}</p>}
             {message && <p>{message}</p>}
@@ -149,7 +229,8 @@ export default function SubscriptionsPage() {
                       <button onClick={() => handleChangePlan(subscription.id, "BASIC")}>Change to BASIC</button>
                       <button onClick={() => handleChangePlan(subscription.id, "PLUS")}>Change to PLUS</button>
                       <button onClick={() => handleChangePlan(subscription.id, "PRO")}>Change to PRO</button>
-                      <button onClick={() => handleRenew(subscription.id)}>Renew</button>
+                      <button onClick={() => handleRenew(subscription.id, true)}>Renew approved</button>
+                      <button onClick={() => handleRenew(subscription.id, false)}>Renew rejected</button>
                       <button onClick={() => handleCancel(subscription.id)}>Cancel immediately</button>
                       <button onClick={() => handleScheduleCancel(subscription.id)}>Cancel at period end</button>
                       <button onClick={() => handleReverseCancel(subscription.id)}>Reverse cancellation</button>

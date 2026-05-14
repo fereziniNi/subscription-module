@@ -54,7 +54,8 @@ public class CreateSubscriptionService {
                 billingCycle,
                 SubscriptionStatus.ACTIVE,
                 amount,
-                billingPeriod
+                billingPeriod,
+                creationDate
         );
 
         subscriptionRepository.save(subscription);

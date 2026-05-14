@@ -11,5 +11,6 @@ public interface SubscriptionRepository {
     boolean existsActiveByCustomerId(UUID customerId);
     Optional<Subscription> findById(UUID subscriptionId);
     List<Subscription> findByCustomerId(UUID customerId);
+    List<Subscription> findAll();
 
 }

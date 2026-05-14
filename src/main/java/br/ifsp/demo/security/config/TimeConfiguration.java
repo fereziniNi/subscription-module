@@ -1,5 +1,6 @@
 package br.ifsp.demo.security.config;
 
+import br.ifsp.demo.config.MutableClock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,7 +10,7 @@ import java.time.Clock;
 public class TimeConfiguration {
 
     @Bean
-    public Clock systemClock() {
-        return Clock.systemDefaultZone();
+    public MutableClock systemClock() {
+        return new MutableClock(Clock.systemDefaultZone());
     }
 }

@@ -166,7 +166,7 @@ public class CancelSubscriptionServiceTest {
     @Test
     @Tag("UnitTest")
     @Tag("Functional")
-    void shouldKeepSubscriptionActiveWhenProcessingScheduledCancellationExactlyAtPeriodEndDate() {
+    void shouldCancelSubscriptionWhenProcessingScheduledCancellationExactlyAtPeriodEndDate() {
         subscriptionRepository = mock(SubscriptionRepository.class);
 
         Clock boundaryClock = Clock.fixed(
@@ -193,7 +193,7 @@ public class CancelSubscriptionServiceTest {
 
         Subscription updatedSubscription = sut.processCycleEnding(subscriptionId);
 
-        assertThat(updatedSubscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(updatedSubscription.getStatus()).isEqualTo(SubscriptionStatus.CANCELLED);
         assertThat(updatedSubscription.isCancellationScheduled()).isTrue();
         verify(subscriptionRepository).save(subscription);
     }
