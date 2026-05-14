@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createSubscription } from "../api/subscriptions";
+import { getAuthenticatedUserId } from "../api/me";
 
 export default function CreateSubscriptionPage() {
   const navigate = useNavigate();
@@ -13,6 +14,25 @@ export default function CreateSubscriptionPage() {
 
   const [error, setError] = useState("");
   const [created, setCreated] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  useEffect(() => {
+    async function loadAuthenticatedUser() {
+      try {
+        const userId = await getAuthenticatedUserId();
+        setForm((prev) => ({
+          ...prev,
+          customerId: userId,
+        }));
+      } catch (err) {
+        setError(err?.response?.data?.message || "Could not identify authenticated user.");
+      } finally {
+        setLoadingUser(false);
+      }
+    }
+
+    loadAuthenticatedUser();
+  }, []);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -36,27 +56,31 @@ export default function CreateSubscriptionPage() {
       <div className="card">
         <h1>Create Subscription</h1>
 
-        <form onSubmit={handleSubmit}>
-          <input
-            name="customerId"
-            placeholder="Customer ID"
-            value={form.customerId}
-            onChange={handleChange}
-          />
+        {loadingUser ? (
+          <p>Loading authenticated user...</p>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <input
+              name="customerId"
+              placeholder="Customer ID"
+              value={form.customerId}
+              readOnly
+            />
 
-          <select name="planType" value={form.planType} onChange={handleChange}>
-            <option value="BASIC">BASIC</option>
-            <option value="PLUS">PLUS</option>
-            <option value="PRO">PRO</option>
-          </select>
+            <select name="planType" value={form.planType} onChange={handleChange}>
+              <option value="BASIC">BASIC</option>
+              <option value="PLUS">PLUS</option>
+              <option value="PRO">PRO</option>
+            </select>
 
-          <select name="billingCycle" value={form.billingCycle} onChange={handleChange}>
-            <option value="MONTHLY">MONTHLY</option>
-            <option value="YEARLY">YEARLY</option>
-          </select>
+            <select name="billingCycle" value={form.billingCycle} onChange={handleChange}>
+              <option value="MONTHLY">MONTHLY</option>
+              <option value="YEARLY">YEARLY</option>
+            </select>
 
-          <button type="submit">Create</button>
-        </form>
+            <button type="submit">Create</button>
+          </form>
+        )}
 
         {error && <p className="error">{error}</p>}
 
