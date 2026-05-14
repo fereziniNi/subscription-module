@@ -60,12 +60,7 @@ export default function CreateSubscriptionPage() {
           <p>Loading authenticated user...</p>
         ) : (
           <form onSubmit={handleSubmit}>
-            <input
-              name="customerId"
-              placeholder="Customer ID"
-              value={form.customerId}
-              readOnly
-            />
+            <p><strong>id do usuario:</strong> {form.customerId}</p>
 
             <select name="planType" value={form.planType} onChange={handleChange}>
               <option value="BASIC">BASIC</option>
