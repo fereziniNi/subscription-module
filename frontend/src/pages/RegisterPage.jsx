@@ -42,6 +42,9 @@ export default function RegisterPage() {
         <p>
           Already registered? <Link to="/login">Login</Link>
         </p>
+        <button type="button" onClick={() => navigate(-1)}>
+          Back
+        </button>
       </form>
     </div>
   );

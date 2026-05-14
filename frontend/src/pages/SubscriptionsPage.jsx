@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   listSubscriptionsByCustomerId,
   changeSubscriptionPlan,
@@ -10,6 +11,8 @@ import {
 import { getAuthenticatedUserId } from "../api/me";
 
 export default function SubscriptionsPage() {
+  const navigate = useNavigate();
+
   const [customerId, setCustomerId] = useState("");
   const [subscriptions, setSubscriptions] = useState([]);
   const [error, setError] = useState("");
@@ -157,6 +160,10 @@ export default function SubscriptionsPage() {
             </div>
           </>
         )}
+
+        <button style={{ marginTop: 16 }} onClick={() => navigate(-1)}>
+          Back
+        </button>
       </div>
     </div>
   );

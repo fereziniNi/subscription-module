@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { generateInvoice } from "../api/subscriptions";
 
 export default function InvoicePage() {
+  const navigate = useNavigate();
+
   const [subscriptionId, setSubscriptionId] = useState("");
   const [invoice, setInvoice] = useState(null);
   const [error, setError] = useState("");
@@ -42,6 +45,10 @@ export default function InvoicePage() {
             <p><strong>End:</strong> {invoice.periodEndDate}</p>
           </div>
         )}
+
+        <button style={{ marginTop: 16 }} onClick={() => navigate(-1)}>
+          Back
+        </button>
       </div>
     </div>
   );

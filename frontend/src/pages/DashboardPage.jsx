@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const { logout } = useAuth();
 
   return (
@@ -16,6 +17,7 @@ export default function DashboardPage() {
         </div>
 
         <button onClick={logout}>Logout</button>
+        <button onClick={() => navigate(-1)}>Back</button>
       </div>
     </div>
   );

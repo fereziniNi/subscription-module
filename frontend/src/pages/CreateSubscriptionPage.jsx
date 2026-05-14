@@ -3,6 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { createSubscription } from "../api/subscriptions";
 import { getAuthenticatedUserId } from "../api/me";
 
+const PLAN_PRICES = {
+  BASIC: {
+    MONTHLY: "29.90",
+    YEARLY: "215.28",
+  },
+  PLUS: {
+    MONTHLY: "49.90",
+    YEARLY: "359.28",
+  },
+  PRO: {
+    MONTHLY: "79.90",
+    YEARLY: "575.28",
+  },
+};
+
 export default function CreateSubscriptionPage() {
   const navigate = useNavigate();
 
@@ -73,6 +88,17 @@ export default function CreateSubscriptionPage() {
               <option value="YEARLY">YEARLY</option>
             </select>
 
+            <div style={{ marginTop: 12, marginBottom: 12 }}>
+              <p><strong>Precos das assinaturas:</strong></p>
+              <p>BASIC: mensal 29.90 | anual 215.28</p>
+              <p>PLUS: mensal 49.90 | anual 359.28</p>
+              <p>PRO: mensal 79.90 | anual 575.28</p>
+              <p>
+                <strong>Preco selecionado:</strong>{" "}
+                {PLAN_PRICES[form.planType][form.billingCycle]}
+              </p>
+            </div>
+
             <button type="submit">Create</button>
           </form>
         )}
@@ -89,7 +115,7 @@ export default function CreateSubscriptionPage() {
           </div>
         )}
 
-        <button style={{ marginTop: 16 }} onClick={() => navigate("/")}>
+        <button style={{ marginTop: 16 }} onClick={() => navigate(-1)}>
           Back
         </button>
       </div>
