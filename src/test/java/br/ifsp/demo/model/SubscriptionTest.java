@@ -112,8 +112,8 @@ class SubscriptionTest {
         subscription.renew(true, LocalDate.of(2026, 5, 2));
 
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
-        assertThat(subscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
-        assertThat(subscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 1));
+        assertThat(subscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 2));
+        assertThat(subscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 2));
         assertThat(subscription.getAmount()).isEqualByComparingTo("29.90");
     }
 
@@ -131,8 +131,8 @@ class SubscriptionTest {
         subscription.renew(true, LocalDate.of(2026, 5, 2));
 
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
-        assertThat(subscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
-        assertThat(subscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2027, 5, 1));
+        assertThat(subscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 2));
+        assertThat(subscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2027, 5, 2));
         assertThat(subscription.getAmount()).isEqualByComparingTo("359.28");
     }
 
@@ -184,8 +184,8 @@ class SubscriptionTest {
         subscription.renew(true, LocalDate.of(2026, 5, 2));
 
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
-        assertThat(subscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
-        assertThat(subscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 1));
+        assertThat(subscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 2));
+        assertThat(subscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 2));
     }
 
     @Test

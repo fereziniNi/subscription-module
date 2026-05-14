@@ -116,7 +116,9 @@ public class Subscription {
             this.scheduledPlanType = null;
         }
 
-        LocalDate newStartDate = this.billingPeriod.getEndDate();
+        LocalDate newStartDate = currentDate.isAfter(this.billingPeriod.getEndDate())
+                ? currentDate
+                : this.billingPeriod.getEndDate();
 
         if (this.billingCycle == BillingCycle.MONTHLY) {
             this.billingPeriod = new BillingPeriod(newStartDate, newStartDate.plusMonths(1));

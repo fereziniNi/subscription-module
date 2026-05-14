@@ -81,7 +81,7 @@ export default function CreateSubscriptionPage() {
           <form className="form-stack" onSubmit={handleSubmit}>
             <div>
               <p className="price-name">User</p>
-              <span className="id-chip">id do usuario: {form.customerId}</span>
+              <span className="id-chip">{form.customerId}</span>
             </div>
 
             <label className="field-label">

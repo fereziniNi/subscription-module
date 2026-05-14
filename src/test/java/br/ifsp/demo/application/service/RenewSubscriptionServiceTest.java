@@ -31,7 +31,7 @@ public class RenewSubscriptionServiceTest {
     void setUp() {
         subscriptionRepository = mock(SubscriptionRepository.class);
         Clock fixedClock = Clock.fixed(
-                Instant.parse("2026-05-02T00:00:00Z"),
+                Instant.parse("2026-05-01T00:00:00Z"),
                 ZoneId.of("UTC")
         );
         sut = new RenewSubscriptionService(subscriptionRepository, fixedClock);
@@ -317,11 +317,11 @@ public class RenewSubscriptionServiceTest {
     @Test
     @Tag("UnitTest")
     @Tag("Functional")
-    void shouldAllowRenewalWhenCurrentDateIsTheDayAfterPeriodEndDate() {
+    void shouldStartNewCycleAtCurrentDateWhenRenewingAfterPeriodEndDate() {
         subscriptionRepository = mock(SubscriptionRepository.class);
 
         Clock boundaryClock = Clock.fixed(
-                Instant.parse("2026-05-02T00:00:00Z"),
+                Instant.parse("2026-05-05T00:00:00Z"),
                 ZoneId.of("UTC")
         );
 
@@ -343,8 +343,42 @@ public class RenewSubscriptionServiceTest {
         Subscription renewedSubscription = sut.renew(subscriptionId, true);
 
         assertThat(renewedSubscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
-        assertThat(renewedSubscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
-        assertThat(renewedSubscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 1));
+        assertThat(renewedSubscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 5));
+        assertThat(renewedSubscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 5));
+        verify(subscriptionRepository).save(subscription);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Functional")
+    void shouldReactivateSuspendedSubscriptionFromCurrentDateWhenPaymentIsApprovedAfterExpiration() {
+        subscriptionRepository = mock(SubscriptionRepository.class);
+
+        Clock boundaryClock = Clock.fixed(
+                Instant.parse("2026-05-08T00:00:00Z"),
+                ZoneId.of("UTC")
+        );
+
+        sut = new RenewSubscriptionService(subscriptionRepository, boundaryClock);
+
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.SUSPENDED,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        Subscription renewedSubscription = sut.renew(subscriptionId, true);
+
+        assertThat(renewedSubscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(renewedSubscription.getBillingPeriod().getStartDate()).isEqualTo(LocalDate.of(2026, 5, 8));
+        assertThat(renewedSubscription.getBillingPeriod().getEndDate()).isEqualTo(LocalDate.of(2026, 6, 8));
         verify(subscriptionRepository).save(subscription);
     }
 
