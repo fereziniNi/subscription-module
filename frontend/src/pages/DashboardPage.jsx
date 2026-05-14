@@ -8,7 +8,10 @@ export default function DashboardPage() {
   return (
     <div className="page">
       <div className="card">
-        <h1>Subscription Module</h1>
+        <div>
+          <h1 className="page-title">Subscription Module</h1>
+          <p className="page-subtitle">Create, renew, cancel and inspect subscription cycles.</p>
+        </div>
 
         <div className="menu">
           <Link to="/subscriptions/create">Create subscription</Link>
@@ -16,8 +19,10 @@ export default function DashboardPage() {
           <Link to="/invoices">Generate invoice</Link>
         </div>
 
-        <button onClick={logout}>Logout</button>
-        <button onClick={() => navigate(-1)}>Back</button>
+        <div className="actions">
+          <button className="secondary" onClick={() => navigate(-1)}>Back</button>
+          <button className="danger" onClick={logout}>Logout</button>
+        </div>
       </div>
     </div>
   );

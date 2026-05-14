@@ -23,30 +23,53 @@ export default function InvoicePage() {
 
   return (
     <div className="page">
-      <div className="card">
-        <h1>Generate Invoice</h1>
+      <div className="card section-stack">
+        <div>
+          <h1 className="page-title">Generate Invoice</h1>
+          <p className="page-subtitle">Create an invoice for a subscription period.</p>
+        </div>
 
-        <input
-          placeholder="Subscription ID"
-          value={subscriptionId}
-          onChange={(e) => setSubscriptionId(e.target.value)}
-        />
+        <label className="field-label">
+          Subscription ID
+          <input
+            placeholder="Subscription ID"
+            value={subscriptionId}
+            onChange={(e) => setSubscriptionId(e.target.value)}
+          />
+        </label>
 
         <button onClick={handleGenerate}>Generate</button>
 
         {error && <p className="error">{error}</p>}
 
         {invoice && (
-          <div style={{ marginTop: 16 }}>
-            <p><strong>Invoice ID:</strong> {invoice.id}</p>
-            <p><strong>Subscription ID:</strong> {invoice.subscriptionId}</p>
-            <p><strong>Amount:</strong> {invoice.amount}</p>
-            <p><strong>Start:</strong> {invoice.periodStartDate}</p>
-            <p><strong>End:</strong> {invoice.periodEndDate}</p>
+          <div className="panel">
+            <div className="panel-header">
+              <h2 className="panel-title">Invoice</h2>
+              <span className="badge badge-neutral">{invoice.amount}</span>
+            </div>
+            <div className="detail-grid">
+              <div className="detail-item">
+                <p className="detail-label">Invoice ID</p>
+                <p className="detail-value">{invoice.id}</p>
+              </div>
+              <div className="detail-item">
+                <p className="detail-label">Subscription ID</p>
+                <p className="detail-value">{invoice.subscriptionId}</p>
+              </div>
+              <div className="detail-item">
+                <p className="detail-label">Start</p>
+                <p className="detail-value">{invoice.periodStartDate}</p>
+              </div>
+              <div className="detail-item">
+                <p className="detail-label">End</p>
+                <p className="detail-value">{invoice.periodEndDate}</p>
+              </div>
+            </div>
           </div>
         )}
 
-        <button style={{ marginTop: 16 }} onClick={() => navigate(-1)}>
+        <button className="secondary" onClick={() => navigate(-1)}>
           Back
         </button>
       </div>

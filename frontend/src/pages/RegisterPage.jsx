@@ -31,18 +31,38 @@ export default function RegisterPage() {
 
   return (
     <div className="page">
-      <form className="card" onSubmit={handleSubmit}>
-        <h1>Register</h1>
-        <input name="name" placeholder="Name" value={form.name} onChange={handleChange} />
-        <input name="lastname" placeholder="Lastname" value={form.lastname} onChange={handleChange} />
-        <input name="email" placeholder="Email" value={form.email} onChange={handleChange} />
-        <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} />
+      <form className="card form-stack" onSubmit={handleSubmit}>
+        <div>
+          <h1 className="page-title">Register</h1>
+          <p className="page-subtitle">Create an account to manage subscriptions.</p>
+        </div>
+
+        <label className="field-label">
+          Name
+          <input name="name" placeholder="Name" value={form.name} onChange={handleChange} />
+        </label>
+
+        <label className="field-label">
+          Lastname
+          <input name="lastname" placeholder="Lastname" value={form.lastname} onChange={handleChange} />
+        </label>
+
+        <label className="field-label">
+          Email
+          <input name="email" placeholder="you@example.com" value={form.email} onChange={handleChange} />
+        </label>
+
+        <label className="field-label">
+          Password
+          <input name="password" type="password" placeholder="Your password" value={form.password} onChange={handleChange} />
+        </label>
+
         {error && <p className="error">{error}</p>}
         <button type="submit">Create account</button>
-        <p>
+        <p className="auth-footer">
           Already registered? <Link to="/login">Login</Link>
         </p>
-        <button type="button" onClick={() => navigate(-1)}>
+        <button className="secondary" type="button" onClick={() => navigate(-1)}>
           Back
         </button>
       </form>

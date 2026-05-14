@@ -11,6 +11,16 @@ import {
 import { getAuthenticatedUserId } from "../api/me";
 import { advanceSimulatedTime, getSimulatedTime, resetSimulatedTime } from "../api/time";
 
+function statusBadgeClass(status) {
+  const normalizedStatus = status?.toLowerCase();
+
+  if (["active", "suspended", "cancelled"].includes(normalizedStatus)) {
+    return `badge badge-${normalizedStatus}`;
+  }
+
+  return "badge badge-neutral";
+}
+
 export default function SubscriptionsPage() {
   const navigate = useNavigate();
 
@@ -165,75 +175,103 @@ export default function SubscriptionsPage() {
   }
 
   return (
-    <div className="page">
-      <div className="card" style={{ maxWidth: 900 }}>
-        <h1>My Subscriptions</h1>
+    <div className="page page-wide">
+      <div className="card card-wide">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">My Subscriptions</h1>
+            <p className="page-subtitle">Manage cycles, payments, renewals and simulated time.</p>
+          </div>
+          <button className="secondary" onClick={() => navigate(-1)}>
+            Back
+          </button>
+        </div>
 
         {loadingUser ? (
-          <p>Loading authenticated user...</p>
+          <p className="muted">Loading authenticated user...</p>
         ) : (
           <>
-            <input value={customerId} readOnly />
+            <div className="panel">
+              <p className="price-name">Authenticated user</p>
+              <span className="id-chip">{customerId}</span>
+            </div>
 
-            <div
-              style={{
-                border: "1px solid #ddd",
-                borderRadius: 8,
-                padding: 12,
-                marginTop: 16,
-              }}
-            >
-              <h2 style={{ fontSize: 18, marginTop: 0 }}>Painel de tempo</h2>
+            <div className="panel">
+              <div className="panel-header">
+                <h2 className="panel-title">Painel de tempo</h2>
+                <span className="time-value">{loadingTime ? "Loading..." : currentDate}</span>
+              </div>
               <p>
-                <strong>Current simulated date:</strong>{" "}
-                {loadingTime ? "Loading..." : currentDate}
+                <span className="muted">Advance the simulated date to expire cycles and test renewal flows.</span>
               </p>
-              <div style={{ display: "grid", gap: 8 }}>
+              <div className="actions">
                 <button onClick={() => handleAdvanceTime(1)}>Advance 1 month</button>
                 <button onClick={() => handleAdvanceTime(12)}>Advance 12 months</button>
-                <button onClick={handleResetTime}>Reset time</button>
+                <button className="secondary" onClick={handleResetTime}>Reset time</button>
               </div>
             </div>
 
-            <button onClick={() => loadSubscriptions()}>Refresh subscriptions</button>
+            <div className="actions">
+              <button className="secondary" onClick={() => loadSubscriptions()}>Refresh subscriptions</button>
+            </div>
 
             {error && <p className="error">{error}</p>}
-            {message && <p>{message}</p>}
+            {message && <p className="notice">{message}</p>}
 
-            <div style={{ marginTop: 20 }}>
+            <div className="subscription-list">
               {subscriptions.length === 0 ? (
-                <p>No subscriptions found.</p>
+                <div className="empty-state">No subscriptions found.</div>
               ) : (
                 subscriptions.map((subscription) => (
-                  <div
-                    key={subscription.id}
-                    style={{
-                      border: "1px solid #ddd",
-                      borderRadius: 8,
-                      padding: 12,
-                      marginBottom: 12,
-                    }}
-                  >
-                    <p><strong>ID:</strong> {subscription.id}</p>
-                    <p><strong>Status:</strong> {subscription.status}</p>
-                    <p><strong>Plan:</strong> {subscription.planType}</p>
-                    <p><strong>Cycle:</strong> {subscription.billingCycle}</p>
-                    <p><strong>Amount:</strong> {subscription.amount}</p>
-                    <p><strong>Period start:</strong> {subscription.periodStartDate}</p>
-                    <p><strong>Period end:</strong> {subscription.periodEndDate}</p>
-                    <p><strong>Scheduled plan:</strong> {subscription.scheduledPlanType || "-"}</p>
-                    <p><strong>Prorated charge:</strong> {subscription.proratedChargeAmount || "-"}</p>
-                    <p><strong>Cancellation scheduled:</strong> {String(subscription.cancellationScheduled)}</p>
+                  <div className="subscription-card" key={subscription.id}>
+                    <div className="subscription-card-header">
+                      <div>
+                        <h2 className="panel-title">{subscription.planType} subscription</h2>
+                        <p className="subscription-id">{subscription.id}</p>
+                      </div>
+                      <span className={statusBadgeClass(subscription.status)}>{subscription.status}</span>
+                    </div>
 
-                    <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
-                      <button onClick={() => handleChangePlan(subscription.id, "BASIC")}>Change to BASIC</button>
-                      <button onClick={() => handleChangePlan(subscription.id, "PLUS")}>Change to PLUS</button>
-                      <button onClick={() => handleChangePlan(subscription.id, "PRO")}>Change to PRO</button>
+                    <div className="detail-grid">
+                      <div className="detail-item">
+                        <p className="detail-label">Cycle</p>
+                        <p className="detail-value">{subscription.billingCycle}</p>
+                      </div>
+                      <div className="detail-item">
+                        <p className="detail-label">Amount</p>
+                        <p className="detail-value">{subscription.amount}</p>
+                      </div>
+                      <div className="detail-item">
+                        <p className="detail-label">Period start</p>
+                        <p className="detail-value">{subscription.periodStartDate}</p>
+                      </div>
+                      <div className="detail-item">
+                        <p className="detail-label">Period end</p>
+                        <p className="detail-value">{subscription.periodEndDate}</p>
+                      </div>
+                      <div className="detail-item">
+                        <p className="detail-label">Scheduled plan</p>
+                        <p className="detail-value">{subscription.scheduledPlanType || "-"}</p>
+                      </div>
+                      <div className="detail-item">
+                        <p className="detail-label">Prorated charge</p>
+                        <p className="detail-value">{subscription.proratedChargeAmount || "-"}</p>
+                      </div>
+                      <div className="detail-item">
+                        <p className="detail-label">Cancellation scheduled</p>
+                        <p className="detail-value">{String(subscription.cancellationScheduled)}</p>
+                      </div>
+                    </div>
+
+                    <div className="actions compact">
+                      <button className="secondary" onClick={() => handleChangePlan(subscription.id, "BASIC")}>Change to BASIC</button>
+                      <button className="secondary" onClick={() => handleChangePlan(subscription.id, "PLUS")}>Change to PLUS</button>
+                      <button className="secondary" onClick={() => handleChangePlan(subscription.id, "PRO")}>Change to PRO</button>
                       <button onClick={() => handleRenew(subscription.id, true)}>Renew approved</button>
-                      <button onClick={() => handleRenew(subscription.id, false)}>Renew rejected</button>
-                      <button onClick={() => handleCancel(subscription.id)}>Cancel immediately</button>
-                      <button onClick={() => handleScheduleCancel(subscription.id)}>Cancel at period end</button>
-                      <button onClick={() => handleReverseCancel(subscription.id)}>Reverse cancellation</button>
+                      <button className="warning" onClick={() => handleRenew(subscription.id, false)}>Renew rejected</button>
+                      <button className="danger" onClick={() => handleCancel(subscription.id)}>Cancel immediately</button>
+                      <button className="warning" onClick={() => handleScheduleCancel(subscription.id)}>Cancel at period end</button>
+                      <button className="secondary" onClick={() => handleReverseCancel(subscription.id)}>Reverse cancellation</button>
                     </div>
                   </div>
                 ))
@@ -241,10 +279,6 @@ export default function SubscriptionsPage() {
             </div>
           </>
         )}
-
-        <button style={{ marginTop: 16 }} onClick={() => navigate(-1)}>
-          Back
-        </button>
       </div>
     </div>
   );

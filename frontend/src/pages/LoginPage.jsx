@@ -30,24 +30,36 @@ export default function LoginPage() {
 
   return (
     <div className="page">
-      <form className="card" onSubmit={handleSubmit}>
-        <h1>Login</h1>
-        <input
-          name="username"
-          placeholder="Email"
-          value={form.username}
-          onChange={handleChange}
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-        />
+      <form className="card form-stack" onSubmit={handleSubmit}>
+        <div>
+          <h1 className="page-title">Login</h1>
+          <p className="page-subtitle">Access your subscription workspace.</p>
+        </div>
+
+        <label className="field-label">
+          Email
+          <input
+            name="username"
+            placeholder="you@example.com"
+            value={form.username}
+            onChange={handleChange}
+          />
+        </label>
+
+        <label className="field-label">
+          Password
+          <input
+            name="password"
+            type="password"
+            placeholder="Your password"
+            value={form.password}
+            onChange={handleChange}
+          />
+        </label>
+
         {error && <p className="error">{error}</p>}
         <button type="submit">Sign in</button>
-        <p>
+        <p className="auth-footer">
           No account? <Link to="/register">Register</Link>
         </p>
       </form>

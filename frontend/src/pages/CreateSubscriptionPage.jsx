@@ -30,6 +30,7 @@ export default function CreateSubscriptionPage() {
   const [error, setError] = useState("");
   const [created, setCreated] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const selectedPrice = PLAN_PRICES[form.planType][form.billingCycle];
 
   useEffect(() => {
     async function loadAuthenticatedUser() {
@@ -69,34 +70,59 @@ export default function CreateSubscriptionPage() {
   return (
     <div className="page">
       <div className="card">
-        <h1>Create Subscription</h1>
+        <div>
+          <h1 className="page-title">Create Subscription</h1>
+          <p className="page-subtitle">Choose a plan and billing cycle before creating a subscription.</p>
+        </div>
 
         {loadingUser ? (
-          <p>Loading authenticated user...</p>
+          <p className="muted">Loading authenticated user...</p>
         ) : (
-          <form onSubmit={handleSubmit}>
-            <p><strong>id do usuario:</strong> {form.customerId}</p>
+          <form className="form-stack" onSubmit={handleSubmit}>
+            <div>
+              <p className="price-name">User</p>
+              <span className="id-chip">id do usuario: {form.customerId}</span>
+            </div>
 
-            <select name="planType" value={form.planType} onChange={handleChange}>
-              <option value="BASIC">BASIC</option>
-              <option value="PLUS">PLUS</option>
-              <option value="PRO">PRO</option>
-            </select>
+            <label className="field-label">
+              Plan
+              <select name="planType" value={form.planType} onChange={handleChange}>
+                <option value="BASIC">BASIC</option>
+                <option value="PLUS">PLUS</option>
+                <option value="PRO">PRO</option>
+              </select>
+            </label>
 
-            <select name="billingCycle" value={form.billingCycle} onChange={handleChange}>
-              <option value="MONTHLY">MONTHLY</option>
-              <option value="YEARLY">YEARLY</option>
-            </select>
+            <label className="field-label">
+              Billing cycle
+              <select name="billingCycle" value={form.billingCycle} onChange={handleChange}>
+                <option value="MONTHLY">MONTHLY</option>
+                <option value="YEARLY">YEARLY</option>
+              </select>
+            </label>
 
-            <div style={{ marginTop: 12, marginBottom: 12 }}>
-              <p><strong>Precos das assinaturas:</strong></p>
-              <p>BASIC: mensal 29.90 | anual 215.28</p>
-              <p>PLUS: mensal 49.90 | anual 359.28</p>
-              <p>PRO: mensal 79.90 | anual 575.28</p>
-              <p>
-                <strong>Preco selecionado:</strong>{" "}
-                {PLAN_PRICES[form.planType][form.billingCycle]}
-              </p>
+            <div className="panel">
+              <div className="panel-header">
+                <h2 className="panel-title">Precos das assinaturas</h2>
+              </div>
+
+              <div className="price-grid">
+                {Object.entries(PLAN_PRICES).map(([plan, prices]) => (
+                  <div
+                    className={`price-option ${form.planType === plan ? "active" : ""}`}
+                    key={plan}
+                  >
+                    <p className="price-name">{plan}</p>
+                    <p className="price-value">Mensal {prices.MONTHLY}</p>
+                    <p className="muted">Anual {prices.YEARLY}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="selected-price">
+                <span>Preco selecionado</span>
+                <span>{selectedPrice}</span>
+              </div>
             </div>
 
             <button type="submit">Create</button>
@@ -106,16 +132,33 @@ export default function CreateSubscriptionPage() {
         {error && <p className="error">{error}</p>}
 
         {created && (
-          <div style={{ marginTop: 16 }}>
-            <p><strong>ID:</strong> {created.id}</p>
-            <p><strong>Status:</strong> {created.status}</p>
-            <p><strong>Plan:</strong> {created.planType}</p>
-            <p><strong>Cycle:</strong> {created.billingCycle}</p>
-            <p><strong>Amount:</strong> {created.amount}</p>
+          <div className="panel">
+            <div className="panel-header">
+              <h2 className="panel-title">Created subscription</h2>
+              <span className={`badge badge-${created.status.toLowerCase()}`}>{created.status}</span>
+            </div>
+            <div className="detail-grid">
+              <div className="detail-item">
+                <p className="detail-label">ID</p>
+                <p className="detail-value">{created.id}</p>
+              </div>
+              <div className="detail-item">
+                <p className="detail-label">Plan</p>
+                <p className="detail-value">{created.planType}</p>
+              </div>
+              <div className="detail-item">
+                <p className="detail-label">Cycle</p>
+                <p className="detail-value">{created.billingCycle}</p>
+              </div>
+              <div className="detail-item">
+                <p className="detail-label">Amount</p>
+                <p className="detail-value">{created.amount}</p>
+              </div>
+            </div>
           </div>
         )}
 
-        <button style={{ marginTop: 16 }} onClick={() => navigate(-1)}>
+        <button className="secondary" onClick={() => navigate(-1)}>
           Back
         </button>
       </div>
