@@ -10,6 +10,11 @@ export async function advanceSimulatedTime(months) {
   return data;
 }
 
+export async function advanceSimulatedTimeByDays(days) {
+  const { data } = await client.post(`/time/advance-days/${days}`);
+  return data;
+}
+
 export async function resetSimulatedTime() {
   const { data } = await client.post("/time/reset");
   return data;

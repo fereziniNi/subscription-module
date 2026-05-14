@@ -41,8 +41,19 @@ class ProcessExpiredSubscriptionsServiceTest {
     }
 
     @Test
-    void shouldSuspendActiveSubscriptionWhenBillingPeriodHasExpired() {
+    void shouldKeepActiveSubscriptionOnBillingPeriodEndDate() {
         Subscription subscription = subscriptionEndingOn(LocalDate.of(2026, 6, 1));
+        when(subscriptionRepository.findAll()).thenReturn(List.of(subscription));
+
+        sut.processExpiredSubscriptions();
+
+        assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        verify(subscriptionRepository, never()).save(subscription);
+    }
+
+    @Test
+    void shouldSuspendActiveSubscriptionOneDayAfterBillingPeriodEndDate() {
+        Subscription subscription = subscriptionEndingOn(LocalDate.of(2026, 5, 31));
         when(subscriptionRepository.findAll()).thenReturn(List.of(subscription));
 
         sut.processExpiredSubscriptions();
@@ -53,7 +64,7 @@ class ProcessExpiredSubscriptionsServiceTest {
 
     @Test
     void shouldCancelExpiredSubscriptionWhenCancellationIsScheduled() {
-        Subscription subscription = subscriptionEndingOn(LocalDate.of(2026, 6, 1));
+        Subscription subscription = subscriptionEndingOn(LocalDate.of(2026, 5, 31));
         subscription.cancelAtPeriodEnd();
         when(subscriptionRepository.findAll()).thenReturn(List.of(subscription));
 

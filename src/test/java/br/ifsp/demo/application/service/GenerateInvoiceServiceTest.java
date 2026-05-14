@@ -210,6 +210,33 @@ class GenerateInvoiceServiceTest {
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
+    void shouldIncludeProratedChargeOnceWhenGeneratingInvoiceAfterUpgrade() {
+        UUID subscriptionId = UUID.randomUUID();
+
+        Subscription subscription = new Subscription(
+                UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+        subscription.changePlan(PlanType.PLUS, LocalDate.of(2026, 4, 16));
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+        when(invoiceRepository.existsBySubscriptionIdAndPeriod(subscriptionId, subscription.getBillingPeriod())).thenReturn(false);
+
+        Invoice generatedInvoice = sut.generate(subscriptionId);
+
+        assertThat(generatedInvoice.getAmount()).isEqualByComparingTo("39.90");
+        assertThat(subscription.getProratedChargeAmount()).isNull();
+        verify(invoiceRepository).save(any(Invoice.class));
+        verify(subscriptionRepository).save(subscription);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
     void shouldGenerateInvoiceWithBasicPlanAmountAfterScheduledDowngradeIsAppliedOnRenewal() {
         UUID subscriptionId = UUID.randomUUID();
 

@@ -308,7 +308,7 @@ class SubscriptionTest {
     }
 
     @Test
-    void shouldSuspendSubscriptionWhenCycleEndingWithoutScheduledCancellation() {
+    void shouldSuspendSubscriptionWhenCycleEndingOneDayAfterPeriodEnd() {
         Subscription subscription = new Subscription(
                 java.util.UUID.randomUUID(),
                 PlanType.BASIC,
@@ -321,6 +321,22 @@ class SubscriptionTest {
         subscription.processCycleEnding(LocalDate.of(2026, 6, 2));
 
         assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.SUSPENDED);
+    }
+
+    @Test
+    void shouldKeepSubscriptionActiveWhenCycleEndingOnPeriodEndDate() {
+        Subscription subscription = new Subscription(
+                java.util.UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 6, 1))
+        );
+
+        subscription.processCycleEnding(LocalDate.of(2026, 6, 1));
+
+        assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
     }
 
     @Test
@@ -359,5 +375,23 @@ class SubscriptionTest {
         assertThat(subscription.getCustomerId()).isEqualTo(customerId);
         assertThat(subscription.getBillingCycle()).isEqualTo(BillingCycle.MONTHLY);
         assertThat(subscription.getCreatedAt()).isEqualTo(createdAt);
+    }
+
+    @Test
+    void shouldConsumeProratedChargeInInvoiceAmountOnlyOnce() {
+        Subscription subscription = new Subscription(
+                java.util.UUID.randomUUID(),
+                PlanType.BASIC,
+                BillingCycle.MONTHLY,
+                SubscriptionStatus.ACTIVE,
+                new BigDecimal("29.90"),
+                new BillingPeriod(LocalDate.of(2026, 4, 1), LocalDate.of(2026, 5, 1))
+        );
+
+        subscription.changePlan(PlanType.PLUS, LocalDate.of(2026, 4, 16));
+
+        assertThat(subscription.consumeInvoiceAmount()).isEqualByComparingTo("39.90");
+        assertThat(subscription.getProratedChargeAmount()).isNull();
+        assertThat(subscription.consumeInvoiceAmount()).isEqualByComparingTo("29.90");
     }
 }

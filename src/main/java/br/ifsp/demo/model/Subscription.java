@@ -153,7 +153,7 @@ public class Subscription {
     }
 
     public boolean processExpiration(LocalDate currentDate) {
-        if (currentDate.isBefore(this.billingPeriod.getEndDate())) {
+        if (!currentDate.isAfter(this.billingPeriod.getEndDate())) {
             return false;
         }
 
@@ -172,6 +172,17 @@ public class Subscription {
         }
 
         return false;
+    }
+
+    public BigDecimal consumeInvoiceAmount() {
+        BigDecimal invoiceAmount = this.amount;
+
+        if (this.proratedChargeAmount != null) {
+            invoiceAmount = invoiceAmount.add(this.proratedChargeAmount);
+            this.proratedChargeAmount = null;
+        }
+
+        return invoiceAmount;
     }
 
 

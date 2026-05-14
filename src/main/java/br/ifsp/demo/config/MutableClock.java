@@ -62,6 +62,21 @@ public class MutableClock extends Clock {
         return currentDate();
     }
 
+    public LocalDate advanceDays(long days) {
+        if (days <= 0) {
+            throw new IllegalArgumentException("Days must be positive");
+        }
+
+        currentInstant.updateAndGet(current ->
+                LocalDateTime.ofInstant(current, zone)
+                        .plusDays(days)
+                        .atZone(zone)
+                        .toInstant()
+        );
+
+        return currentDate();
+    }
+
     public LocalDate reset() {
         currentInstant.set(sourceClock.instant());
 

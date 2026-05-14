@@ -50,6 +50,18 @@ public class TimeController {
     }
 
     @Operation(
+            summary = "Advance simulated time by days",
+            description = "Advances the application clock by the requested number of days."
+    )
+    @PostMapping("/advance-days/{days}")
+    public ResponseEntity<TimeResponse> advanceDays(@PathVariable int days) {
+        mutableClock.advanceDays(days);
+        processExpiredSubscriptionsService.processExpiredSubscriptions();
+
+        return ResponseEntity.ok(response());
+    }
+
+    @Operation(
             summary = "Reset simulated time",
             description = "Resets the application clock to the current system date."
     )

@@ -9,7 +9,12 @@ import {
   renewSubscription,
 } from "../api/subscriptions";
 import { getAuthenticatedUserId } from "../api/me";
-import { advanceSimulatedTime, getSimulatedTime, resetSimulatedTime } from "../api/time";
+import {
+  advanceSimulatedTime,
+  advanceSimulatedTimeByDays,
+  getSimulatedTime,
+  resetSimulatedTime,
+} from "../api/time";
 
 function statusBadgeClass(status) {
   const normalizedStatus = status?.toLowerCase();
@@ -91,6 +96,19 @@ export default function SubscriptionsPage() {
       const data = await advanceSimulatedTime(months);
       setCurrentDate(data.currentDate);
       setMessage(`Simulated time advanced ${months} month${months > 1 ? "s" : ""}.`);
+      await loadSubscriptions({ clearMessage: false });
+    } catch (err) {
+      setError(err?.response?.data?.message || "Could not advance simulated time.");
+    }
+  }
+
+  async function handleAdvanceDays(days) {
+    setError("");
+
+    try {
+      const data = await advanceSimulatedTimeByDays(days);
+      setCurrentDate(data.currentDate);
+      setMessage(`Simulated time advanced ${days} day${days > 1 ? "s" : ""}.`);
       await loadSubscriptions({ clearMessage: false });
     } catch (err) {
       setError(err?.response?.data?.message || "Could not advance simulated time.");
@@ -205,6 +223,7 @@ export default function SubscriptionsPage() {
                 <span className="muted">Advance the simulated date to expire cycles and test renewal flows.</span>
               </p>
               <div className="actions">
+                <button onClick={() => handleAdvanceDays(1)}>Advance 1 day</button>
                 <button onClick={() => handleAdvanceTime(1)}>Advance 1 month</button>
                 <button onClick={() => handleAdvanceTime(12)}>Advance 12 months</button>
                 <button className="secondary" onClick={handleResetTime}>Reset time</button>

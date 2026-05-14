@@ -39,10 +39,11 @@ public class GenerateInvoiceService {
         Invoice invoice = new Invoice(
                 subscriptionId,
                 subscription.getBillingPeriod(),
-                subscription.getAmount()
+                subscription.consumeInvoiceAmount()
         );
 
         invoiceRepository.save(invoice);
+        subscriptionRepository.save(subscription);
         return invoice;
     }
 

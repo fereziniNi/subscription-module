@@ -25,6 +25,16 @@ class MutableClockTest {
     }
 
     @Test
+    void shouldAdvanceCurrentDateByDays() {
+        MutableClock clock = new MutableClock(fixedClock());
+
+        LocalDate advancedDate = clock.advanceDays(1);
+
+        assertThat(advancedDate).isEqualTo(LocalDate.of(2026, 5, 15));
+        assertThat(clock.currentDate()).isEqualTo(LocalDate.of(2026, 5, 15));
+    }
+
+    @Test
     void shouldResetToSourceClockDate() {
         MutableClock clock = new MutableClock(fixedClock());
 
@@ -42,6 +52,15 @@ class MutableClockTest {
         assertThatThrownBy(() -> clock.advanceMonths(0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Months must be positive");
+    }
+
+    @Test
+    void shouldRejectNonPositiveDayAdvances() {
+        MutableClock clock = new MutableClock(fixedClock());
+
+        assertThatThrownBy(() -> clock.advanceDays(0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Days must be positive");
     }
 
     private Clock fixedClock() {
