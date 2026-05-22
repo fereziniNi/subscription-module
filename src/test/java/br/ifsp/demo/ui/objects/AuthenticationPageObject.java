@@ -26,4 +26,12 @@ public class AuthenticationPageObject extends BasePageObject {
         return driver.findElement(By.className("error")).getText();
     }
 
+    public String email(){
+        return driver.findElement(By.id("username")).getText();
+    }
+
+    public String password(){
+        return driver.findElement(By.id("password")).getText();
+    }
+
 }
