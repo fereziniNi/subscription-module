@@ -17,4 +17,13 @@ public class AuthenticationPageObject extends BasePageObject {
         driver.findElement(By.cssSelector("button[type='submit']")).click();
     }
 
+    public RegistrationPageObject navigateToRegistrationPage(){
+        driver.findElement(By.linkText("Register")).click();
+        return new RegistrationPageObject(driver);
+    }
+
+    public String pageErrorMessage() {
+        return driver.findElement(By.className("error")).getText();
+    }
+
 }
