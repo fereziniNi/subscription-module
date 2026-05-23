@@ -5,6 +5,8 @@ import br.ifsp.demo.ui.objects.AuthenticationPageObject;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -34,22 +36,22 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
         softly.assertAll();
     }
 
-    @Test
-    @DisplayName("Should show invalid credentials message")
-    void shouldShowInvalidCredentialsMessage() {
+    @ParameterizedTest
+    @CsvSource({
+            "wrong@email.com, wrong-password",
+            "' ', wrong-password",
+            "'wrong@email.com', ' '"
+    })
+    @DisplayName("Should show invalid credentials message for invalid login attempts")
+    void shouldShowInvalidCredentialsMessage(String email, String password) {
+
         var authPage = new AuthenticationPageObject(driver);
-        authPage.authenticate("wrong@email.com", "wrong-password");
+
+        authPage.authenticate(email, password);
+
         assertThat(authPage.pageErrorMessage())
                 .isEqualTo("Invalid credentials.");
     }
 
-    @Test
-    @DisplayName("Should show invalid credential message if email is empty")
-    void shouldShowInvalidCredentialMessageIfEmailIsEmpty() {
-        var authPage = new AuthenticationPageObject(driver);
-        authPage.authenticate(" ", "wrong-password");
-        assertThat(authPage.pageErrorMessage())
-                .isEqualTo("Invalid credentials.");
-    }
 
 }
