@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AuthenticationPageObjectTest extends BaseSeleniumTest {
     private static final String URL = "https://subscription-module-seven.vercel.app/login";
@@ -31,6 +32,18 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
         softly.assertThat(registrationPage.isPasswordFieldVisible()).isTrue();
 
         softly.assertAll();
+    }
+
+    @Test
+    @DisplayName("Should show invalid credentials message")
+    void shouldShowInvalidCredentialsMessage() {
+
+        var authPage = new AuthenticationPageObject(driver);
+
+        authPage.authenticate("wrong@email.com", "wrong-password");
+
+        assertThat(authPage.pageErrorMessage())
+                .isEqualTo("Invalid credentials.");
     }
 
 }

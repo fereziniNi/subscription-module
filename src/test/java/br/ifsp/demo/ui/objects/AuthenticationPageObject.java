@@ -3,6 +3,14 @@ package br.ifsp.demo.ui.objects;
 import br.ifsp.demo.ui.base.BasePageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
+import java.util.NoSuchElementException;
 
 public class AuthenticationPageObject extends BasePageObject {
     private static final String PAGE_TITLE = "frontend";
@@ -23,7 +31,13 @@ public class AuthenticationPageObject extends BasePageObject {
     }
 
     public String pageErrorMessage() {
-        return driver.findElement(By.className("error")).getText();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement errorMessage = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".error")
+                )
+        );
+        return errorMessage.getText();
     }
 
     public String email(){
