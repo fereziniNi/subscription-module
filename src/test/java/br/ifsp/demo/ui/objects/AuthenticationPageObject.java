@@ -14,6 +14,12 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class AuthenticationPageObject extends BasePageObject {
+    private static final By USERNAME_INPUT = By.name("username");
+    private static final By PASSWORD_INPUT = By.name("password");
+    private static final By SUBMIT_BUTTON = By.cssSelector("button[type='submit']");
+    private static final By ERROR_MESSAGE = By.cssSelector(".error");
+    private static final By REGISTER_LINK = By.linkText("Register");
+
 
     public AuthenticationPageObject(WebDriver driver) {
         super(driver);
@@ -21,33 +27,28 @@ public class AuthenticationPageObject extends BasePageObject {
             throw new IllegalStateException("Not on login page");
         }
     }
-    public void authenticate(String email, String password){
-        driver.findElement(By.name("username")).sendKeys(email);
-        driver.findElement(By.name("password")).sendKeys(password);
-        driver.findElement(By.cssSelector("button[type='submit']")).click();
+
+    public void authenticate(String email, String password) {
+        type(USERNAME_INPUT, email);
+        type(PASSWORD_INPUT, password);
+        click(SUBMIT_BUTTON);
     }
 
-    public RegistrationPageObject navigateToRegistrationPage(){
-        driver.findElement(By.linkText("Register")).click();
+    public RegistrationPageObject goToRegister() {
+        click(REGISTER_LINK);
         return new RegistrationPageObject(driver);
     }
 
-    public String pageErrorMessage() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        WebElement errorMessage = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.cssSelector(".error")
-                )
-        );
-        return errorMessage.getText();
+    public String getErrorMessage() {
+        return getText(ERROR_MESSAGE);
     }
 
-    public String email(){
-        return driver.findElement(By.name("username")).getAttribute("value");
+    public String getEmailValue() {
+        return waitForElement(USERNAME_INPUT).getAttribute("value");
     }
 
-    public String password(){
-        return driver.findElement(By.id("password")).getText();
+    public String getPasswordValue() {
+        return waitForElement(PASSWORD_INPUT).getAttribute("value");
     }
 
 }
