@@ -53,8 +53,13 @@ public class AuthenticationPageObject extends BasePageObject {
         return waitForElement(USERNAME_INPUT).getAttribute("value");
     }
 
+
     public String getPasswordValue() {
         return waitForElement(PASSWORD_INPUT).getAttribute("value");
+    }
+
+    public String getPasswordType() {
+        return waitForElement(PASSWORD_INPUT).getAttribute("type");
     }
 
 }

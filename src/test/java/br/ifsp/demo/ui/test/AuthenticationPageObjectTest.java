@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -62,6 +64,13 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
         softly.assertThat(homePage.getPageTitle()).isEqualTo("Subscription Module");
         softly.assertThat(homePage.isLogoutButtonVisible()).isTrue();
         softly.assertAll();
+    }
+
+    @Test
+    @DisplayName("Should mask password input field")
+    void shouldMaskPasswordInputField() {
+        var loginPage = new AuthenticationPageObject(driver);
+        assertThat(loginPage.getPasswordType()).isEqualTo("password");
     }
 
 }
