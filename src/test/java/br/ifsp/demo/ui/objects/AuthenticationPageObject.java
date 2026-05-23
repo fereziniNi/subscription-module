@@ -1,17 +1,12 @@
 package br.ifsp.demo.ui.objects;
 
 import br.ifsp.demo.ui.base.BasePageObject;
-import br.ifsp.demo.ui.base.HomePageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class AuthenticationPageObject extends BasePageObject {
@@ -29,14 +24,18 @@ public class AuthenticationPageObject extends BasePageObject {
         }
     }
 
-    public HomePageObject authenticate(String email, String password) {
+    public HomePageObject loginSuccessfully(String email, String password) {
         type(USERNAME_INPUT, email);
         type(PASSWORD_INPUT, password);
         click(SUBMIT_BUTTON);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         wait.until(ExpectedConditions.urlToBe("https://subscription-module-seven.vercel.app/"));
-
         return new HomePageObject(driver);
+    }
+
+    public void attemptLogin(String email, String password) {
+        type(USERNAME_INPUT, email);
+        type(PASSWORD_INPUT, password);
+        click(SUBMIT_BUTTON);
     }
 
     public RegistrationPageObject goToRegister() {
@@ -45,7 +44,9 @@ public class AuthenticationPageObject extends BasePageObject {
     }
 
     public String getErrorMessage() {
-        return getText(ERROR_MESSAGE);
+        return wait.until(
+                ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE)
+        ).getText();
     }
 
     public String getEmailValue() {

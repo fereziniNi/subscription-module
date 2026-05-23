@@ -25,7 +25,7 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
     void shouldRegistrationANewProfile() {
         var registerPage = new RegistrationPageObject(driver);
 
-        String email = STR."teste\{System.currentTimeMillis()}@teste.com";
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
         registerPage.register("teste1", "teste1", email, "teste1");
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));

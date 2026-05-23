@@ -8,8 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.ExpectedConditions;
+
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -40,14 +39,14 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
     @ParameterizedTest
     @CsvSource({
             "wrong@email.com, wrong-password",
-            "' ', wrong-password",
-            "'wrong@email.com', ' '",
-            "'', ''"
+            " , wrong-password",
+            "wrong@email.com, ",
+            ","
     })
     @DisplayName("Should show invalid credentials message for invalid login attempts")
     void shouldShowInvalidCredentialsMessage(String email, String password) {
         var authPage = new AuthenticationPageObject(driver);
-        authPage.authenticate(email, password);
+        authPage.attemptLogin(email, password);
         assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
     }
 
@@ -55,7 +54,7 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
     @DisplayName("Should login with valid credentials")
     void shouldLoginWithValidCredentials() {
         var loginPage = new AuthenticationPageObject(driver);
-        var homePage = loginPage.authenticate("teste@teste.com", "teste");
+        var homePage = loginPage.loginSuccessfully("teste@teste.com", "teste");
 
         final SoftAssertions softly = new SoftAssertions();
 

@@ -30,7 +30,11 @@ public abstract class BasePageObject {
     }
 
     protected void type(By locator, String text) {
-        waitForElement(locator).sendKeys(text);
+        WebElement element = waitForElement(locator);
+        element.clear();
+        if (text != null && !text.trim().isEmpty()) {
+            element.sendKeys(text);
+        }
     }
 
     protected String getText(By locator) {

@@ -1,5 +1,6 @@
-package br.ifsp.demo.ui.base;
+package br.ifsp.demo.ui.objects;
 
+import br.ifsp.demo.ui.base.BasePageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
