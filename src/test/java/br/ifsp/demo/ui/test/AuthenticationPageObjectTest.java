@@ -54,15 +54,13 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
     @DisplayName("Should login with valid credentials")
     void shouldLoginWithValidCredentials() {
         var loginPage = new AuthenticationPageObject(driver);
-        loginPage.authenticate("teste@teste.com", "teste");
-
-        wait.until(ExpectedConditions.urlToBe("https://subscription-module-seven.vercel.app/"));
+        var homePage = loginPage.authenticate("teste@teste.com", "teste");
 
         final SoftAssertions softly = new SoftAssertions();
 
-        softly.assertThat(driver.getCurrentUrl()).isEqualTo("https://subscription-module-seven.vercel.app/");
-        softly.assertThat(driver.findElement(By.cssSelector(".page-title")).getText()).isEqualTo("Subscription Module");
-
+        assertThat(homePage.isLoaded()).isTrue();
+        assertThat(homePage.getPageTitle()).isEqualTo("Subscription Module");
+        assertThat(homePage.isLogoutButtonVisible()).isTrue();
     }
 
 }
