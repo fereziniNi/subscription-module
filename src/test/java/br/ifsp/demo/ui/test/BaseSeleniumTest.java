@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
-public class BaseSeleniumTest {
+public abstract class BaseSeleniumTest {
     protected WebDriver driver;
 
     @BeforeEach
