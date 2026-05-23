@@ -37,11 +37,17 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
     @Test
     @DisplayName("Should show invalid credentials message")
     void shouldShowInvalidCredentialsMessage() {
-
         var authPage = new AuthenticationPageObject(driver);
-
         authPage.authenticate("wrong@email.com", "wrong-password");
+        assertThat(authPage.pageErrorMessage())
+                .isEqualTo("Invalid credentials.");
+    }
 
+    @Test
+    @DisplayName("Should show invalid credential message if email is empty")
+    void shouldShowInvalidCredentialMessageIfEmailIsEmpty() {
+        var authPage = new AuthenticationPageObject(driver);
+        authPage.authenticate(" ", "wrong-password");
         assertThat(authPage.pageErrorMessage())
                 .isEqualTo("Invalid credentials.");
     }
