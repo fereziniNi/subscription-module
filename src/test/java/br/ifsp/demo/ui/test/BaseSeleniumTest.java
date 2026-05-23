@@ -7,16 +7,19 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 public class BaseSeleniumTest {
     protected WebDriver driver;
+
     @BeforeEach
     public void setUp() {
-        // driver = new ChromeDriver();
         driver = new FirefoxDriver();
+        driver.manage().window().maximize();
         setInitialPage();
     }
 
     @AfterEach
     public void tearDown() {
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
     }
 
     protected void setInitialPage(){}
