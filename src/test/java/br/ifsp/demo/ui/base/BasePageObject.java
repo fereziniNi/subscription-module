@@ -36,4 +36,14 @@ public abstract class BasePageObject {
     protected String getText(By locator) {
         return waitForElement(locator).getText();
     }
+
+    protected boolean isElementPresent(By locator) {
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
+
