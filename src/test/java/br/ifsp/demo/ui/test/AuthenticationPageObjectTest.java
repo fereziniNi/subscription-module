@@ -22,16 +22,15 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
     @DisplayName("Should navigate to registration page by clicking the link")
     void shouldNavigateToRegistrationPageByClickingTheLink() {
         var authPage = new AuthenticationPageObject(driver);
-        var registrationPage = authPage.navigateToRegistrationPage();
+        var registrationPage = authPage.goToRegister();
 
-        final var softly = new SoftAssertions();
+        final SoftAssertions softly = new SoftAssertions();
 
-        softly.assertThat(registrationPage.pageTitle()).isEqualTo("frontend");
+        softly.assertThat(driver.getCurrentUrl()).contains("/register");
         softly.assertThat(registrationPage.isNameFieldVisible()).isTrue();
         softly.assertThat(registrationPage.isLastNameFieldVisible()).isTrue();
         softly.assertThat(registrationPage.isEmailFieldVisible()).isTrue();
         softly.assertThat(registrationPage.isPasswordFieldVisible()).isTrue();
-
         softly.assertAll();
     }
 
@@ -45,8 +44,7 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
     void shouldShowInvalidCredentialsMessage(String email, String password) {
         var authPage = new AuthenticationPageObject(driver);
         authPage.authenticate(email, password);
-        assertThat(authPage.pageErrorMessage())
-                .isEqualTo("Invalid credentials.");
+        assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
     }
 
 
