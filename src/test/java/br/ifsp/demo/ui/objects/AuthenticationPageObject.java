@@ -41,7 +41,7 @@ public class AuthenticationPageObject extends BasePageObject {
     }
 
     public String email(){
-        return driver.findElement(By.id("username")).getText();
+        return driver.findElement(By.name("username")).getAttribute("value");
     }
 
     public String password(){
