@@ -11,13 +11,15 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class AuthenticationPageObject extends BasePageObject {
-    private static final String PAGE_TITLE = "frontend";
 
     public AuthenticationPageObject(WebDriver driver) {
         super(driver);
-        if (!PAGE_TITLE.equals(pageTitle())) throw new IllegalStateException("Wrong page url: " + driver.getCurrentUrl());
+        if (!Objects.requireNonNull(driver.getCurrentUrl()).contains("/login")) {
+            throw new IllegalStateException("Not on login page");
+        }
     }
     public void authenticate(String email, String password){
         driver.findElement(By.name("username")).sendKeys(email);
