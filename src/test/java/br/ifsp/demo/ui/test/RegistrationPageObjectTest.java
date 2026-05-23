@@ -33,4 +33,22 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         assertThat(driver.getCurrentUrl()).contains("/login");
     }
 
+    @Test
+    @DisplayName("Should not allow duplicated email registration")
+    void shouldNotAllowDuplicatedEmailRegistration() {
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+        var registerPage = new RegistrationPageObject(driver);
+
+        registerPage.register("teste","teste",email,"teste123");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        driver.get("https://subscription-module-seven.vercel.app/register");
+
+        registerPage.register("teste", "teste", email,"teste123");
+
+        assertThat(registerPage.pageErrorMessage()).contains("Could not register user.");
+    }
+
 }

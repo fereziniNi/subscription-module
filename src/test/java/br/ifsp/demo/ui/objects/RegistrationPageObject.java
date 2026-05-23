@@ -3,6 +3,11 @@ package br.ifsp.demo.ui.objects;
 import br.ifsp.demo.ui.base.BasePageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class RegistrationPageObject extends BasePageObject {
     private static final String PAGE_TITLE = "frontend";
@@ -35,6 +40,16 @@ public class RegistrationPageObject extends BasePageObject {
         driver.findElement(By.name("email")).sendKeys(email);
         driver.findElement(By.name("password")).sendKeys(password);
         driver.findElement(By.cssSelector("button[type='submit']")).click();
+    }
+
+    public String pageErrorMessage() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        WebElement errorMessage = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(".error")
+                )
+        );
+        return errorMessage.getText();
     }
 
     public boolean isCreateAccountButtonVisible() {
