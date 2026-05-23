@@ -12,6 +12,6 @@ public class BaseSeleniumTest {
         driver = new FirefoxDriver();
         setInitialPage();
     }
-    // Hook method that can be overridden to set the initial test page
+
     protected void setInitialPage(){}
 }

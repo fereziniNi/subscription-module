@@ -29,6 +29,14 @@ public class RegistrationPageObject extends BasePageObject {
         return driver.findElement(By.name("password")).isDisplayed();
     }
 
+    public void register(String name, String lastname, String email, String password){
+        driver.findElement(By.name("name")).sendKeys(name);
+        driver.findElement(By.name("lastname")).sendKeys(lastname);
+        driver.findElement(By.name("email")).sendKeys(email);
+        driver.findElement(By.name("password")).sendKeys(password);
+        driver.findElement(By.cssSelector("button[type='submit']")).click();
+    }
+
     public boolean isCreateAccountButtonVisible() {
         return driver.findElement(By.cssSelector("button[type='submit']")).isDisplayed();
     }
@@ -36,4 +44,5 @@ public class RegistrationPageObject extends BasePageObject {
     public boolean isLoginLinkVisible() {
         return driver.findElement(By.cssSelector("a[href='/login']")).isDisplayed();
     }
+
 }
