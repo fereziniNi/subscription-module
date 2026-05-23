@@ -41,7 +41,8 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
     @CsvSource({
             "wrong@email.com, wrong-password",
             "' ', wrong-password",
-            "'wrong@email.com', ' '"
+            "'wrong@email.com', ' '",
+            "'', ''"
     })
     @DisplayName("Should show invalid credentials message for invalid login attempts")
     void shouldShowInvalidCredentialsMessage(String email, String password) {
@@ -58,9 +59,10 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
 
         final SoftAssertions softly = new SoftAssertions();
 
-        assertThat(homePage.isLoaded()).isTrue();
-        assertThat(homePage.getPageTitle()).isEqualTo("Subscription Module");
-        assertThat(homePage.isLogoutButtonVisible()).isTrue();
+        softly.assertThat(homePage.isLoaded()).isTrue();
+        softly.assertThat(homePage.getPageTitle()).isEqualTo("Subscription Module");
+        softly.assertThat(homePage.isLogoutButtonVisible()).isTrue();
+        softly.assertAll();
     }
 
 }
