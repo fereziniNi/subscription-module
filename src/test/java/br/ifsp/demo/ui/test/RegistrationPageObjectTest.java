@@ -422,5 +422,23 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         assertThat(driver.getCurrentUrl()).contains("/login");
     }
 
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+            "' OR '1'='1|Sobrenome|email@test.com|senha",
+            "Nome|' OR '1'='1|email@test.com|senha",
+            "Nome|Sobrenome|test@test.com|' OR '1'='1"
+    })
+    @DisplayName("Should safely handle SQL injection attempts in all fields")
+    void shouldSafelyHandleSQLInjectionAttempts(String name, String lastname, String email, String password) {
+        var registerPage = new RegistrationPageObject(driver);
+
+        registerPage.register(name, lastname, email, password);
+
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(driver.getCurrentUrl()).contains("/register");
+        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+        softly.assertAll();
+    }
+
 
 }
