@@ -233,4 +233,34 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         assertThat(driver.getCurrentUrl()).contains("/login");
     }
 
+    @Test
+    @DisplayName("Should accept name with minimum valid length (1 character)")
+    void shouldAcceptNameWithMinimumLength() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+        registerPage.register("A", "Sobrenome", email, "senha123");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
+    @Test
+    @DisplayName("Should accept name with maximum valid length (50 characters)")
+    void shouldAcceptNameWithMaximumLength() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+        String longName = "A".repeat(50);
+
+        registerPage.register(longName, "Sobrenome", email, "senha123");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
+
 }
