@@ -33,7 +33,6 @@ public class HomePageObject extends BasePageObject {
         click(LOGOUT_BUTTON);
     }
 
-    // Navegação
     public void goToCreateSubscription() {
         click(CREATE_SUBSCRIPTION_LINK);
     }

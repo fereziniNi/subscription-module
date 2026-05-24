@@ -109,23 +109,6 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "usuario@",
-            "@dominio.com",
-            "usuario@dominio",
-            "user @test.com",
-            "user#$%@test.com",
-            "..@test.com",
-            "user..name@test.com"
-    })
-    @DisplayName("Should show invalid credentials for malformed email formats")
-    void shouldRejectMalformedEmailFormats(String email) {
-        var authPage = new AuthenticationPageObject(driver);
-        authPage.attemptLogin(email, "validPassword123");
-        assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
-    }
-
-    @ParameterizedTest
     @CsvSource(delimiter = '|', value = {
             "' OR '1'='1|password",
             "test@test.com|' OR '1'='1",

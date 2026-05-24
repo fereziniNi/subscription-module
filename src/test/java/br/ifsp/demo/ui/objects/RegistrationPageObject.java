@@ -8,14 +8,24 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.Objects;
 
 public class RegistrationPageObject extends BasePageObject {
-    private static final String PAGE_TITLE = "frontend";
+    private static final By PAGE_TITLE = By.cssSelector(".page-title");
+    private static final By PAGE_SUBTITLE = By.cssSelector(".page-subtitle");
+    private static final By NAME_INPUT = By.name("name");
+    private static final By LASTNAME_INPUT = By.name("lastname");
+    private static final By EMAIL_INPUT = By.name("email");
+    private static final By PASSWORD_INPUT = By.name("password");
+    private static final By SUBMIT_BUTTON = By.cssSelector("button[type='submit']");
+    private static final By LOGIN_LINK = By.cssSelector("a[href='/login']");
+    private static final By BACK_BUTTON = By.cssSelector("button.secondary[type='button']");
 
     public RegistrationPageObject(WebDriver driver) {
         super(driver);
-        if (!PAGE_TITLE.equals(pageTitle()))
-            throw new IllegalStateException("Wrong page url: " + driver.getCurrentUrl());
+        if (!Objects.requireNonNull(driver.getCurrentUrl()).contains("/register")) {
+            throw new IllegalStateException("Not on register page");
+        }
     }
 
     public boolean isNameFieldVisible() {
@@ -60,4 +70,76 @@ public class RegistrationPageObject extends BasePageObject {
         return driver.findElement(By.cssSelector("a[href='/login']")).isDisplayed();
     }
 
+    public String getPageTitle() {
+        return driver.findElement(PAGE_TITLE).getText();
+    }
+
+    public String getPageSubtitle() {
+        return driver.findElement(PAGE_SUBTITLE).getText();
+    }
+
+    public String getNamePlaceholder() {
+        return driver.findElement(NAME_INPUT).getAttribute("placeholder");
+    }
+
+    public String getLastnamePlaceholder() {
+        return driver.findElement(LASTNAME_INPUT).getAttribute("placeholder");
+    }
+
+    public String getEmailPlaceholder() {
+        return driver.findElement(EMAIL_INPUT).getAttribute("placeholder");
+    }
+
+    public String getPasswordPlaceholder() {
+        return driver.findElement(PASSWORD_INPUT).getAttribute("placeholder");
+    }
+
+    public String getSubmitButtonText() {
+        return driver.findElement(SUBMIT_BUTTON).getText();
+    }
+
+    public boolean isBackButtonVisible() {
+        return driver.findElement(BACK_BUTTON).isDisplayed();
+    }
+
+    public String getBackButtonText() {
+        return driver.findElement(BACK_BUTTON).getText();
+    }
+
+    public String getNameValue() {
+        return driver.findElement(NAME_INPUT).getAttribute("value");
+    }
+
+    public String getLastnameValue() {
+        return driver.findElement(LASTNAME_INPUT).getAttribute("value");
+    }
+
+    public String getEmailValue() {
+        return driver.findElement(EMAIL_INPUT).getAttribute("value");
+    }
+
+    public void fillLastname(String lastname) {
+        driver.findElement(LASTNAME_INPUT).clear();
+        if (lastname != null && !lastname.isEmpty()) {
+            driver.findElement(LASTNAME_INPUT).sendKeys(lastname);
+        }
+    }
+
+    public void fillEmail(String email) {
+        driver.findElement(EMAIL_INPUT).clear();
+        if (email != null && !email.isEmpty()) {
+            driver.findElement(EMAIL_INPUT).sendKeys(email);
+        }
+    }
+
+    public void fillPassword(String password) {
+        driver.findElement(PASSWORD_INPUT).clear();
+        if (password != null && !password.isEmpty()) {
+            driver.findElement(PASSWORD_INPUT).sendKeys(password);
+        }
+    }
+
+    public void clickSubmitButton() {
+        driver.findElement(SUBMIT_BUTTON).click();
+    }
 }
