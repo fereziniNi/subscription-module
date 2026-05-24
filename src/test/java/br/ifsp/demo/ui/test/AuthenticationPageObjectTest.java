@@ -125,4 +125,19 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
         assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
     }
 
-}
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+            "' OR '1'='1|password",
+            "test@test.com|' OR '1'='1",
+            "admin'--|password",
+            "test@test.com|1' OR '1' = '1"
+    })
+    @DisplayName("Should safely handle SQL injection attempts")
+    void shouldSafelyHandleSQLInjectionAttempts(String email, String password) {
+        var authPage = new AuthenticationPageObject(driver);
+        authPage.attemptLogin(email, password);
+
+        assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
+    }
+
+    }
