@@ -97,4 +97,15 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
         softly.assertAll();
     }
 
+    @Test
+    @DisplayName("Should have empty fields on initial page load")
+    void shouldHaveEmptyFieldsOnInitialLoad() {
+        var authPage = new AuthenticationPageObject(driver);
+
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(authPage.getEmailValue()).isEmpty();
+        softly.assertThat(authPage.getPasswordValue()).isEmpty();
+        softly.assertAll();
+    }
+
 }
