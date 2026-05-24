@@ -43,7 +43,7 @@ public abstract class BasePageObject {
 
     protected boolean isElementPresent(By locator) {
         try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+            driver.findElement(locator);
             return true;
         } catch (Exception e) {
             return false;
