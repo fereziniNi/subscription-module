@@ -6,6 +6,8 @@ import br.ifsp.demo.ui.objects.RegistrationPageObject;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -172,6 +174,29 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         var registerPage = new RegistrationPageObject(driver);
 
         registerPage.register("", "", "", "");
+
+        assertThat(driver.getCurrentUrl()).contains("/register");
+    }
+
+
+    @ParameterizedTest
+    @CsvSource({
+            "usuario@",
+            "@dominio.com",
+            "usuario@dominio",
+            "user @test.com",
+            "user#$%@test.com",
+            "..@test.com",
+            "user..name@test.com",
+            ".user@test.com",
+            "user.@test.com",
+            "usuariodominio.com"
+    })
+    @DisplayName("Should reject malformed email formats")
+    void shouldRejectMalformedEmailFormats(String email) {
+        var registerPage = new RegistrationPageObject(driver);
+
+        registerPage.register("Nome", "Sobrenome", email, "senha123");
 
         assertThat(driver.getCurrentUrl()).contains("/register");
     }
