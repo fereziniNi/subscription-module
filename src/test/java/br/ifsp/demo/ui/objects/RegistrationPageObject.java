@@ -129,6 +129,15 @@ public class RegistrationPageObject extends BasePageObject {
         driver.findElement(BACK_BUTTON).click();
     }
 
+    public boolean hasErrorMessage() {
+        try {
+            driver.findElement(By.cssSelector(".error"));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public void fillLastname(String lastname) {
         driver.findElement(LASTNAME_INPUT).clear();
         if (lastname != null && !lastname.isEmpty()) {
