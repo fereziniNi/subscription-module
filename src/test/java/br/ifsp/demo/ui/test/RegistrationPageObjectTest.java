@@ -365,5 +365,62 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         softly.assertAll();
     }
 
+    @Test
+    @DisplayName("Should accept password with minimum length (1 character)")
+    void shouldAcceptPasswordWithMinimumLength() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+        registerPage.register("Nome", "Sobrenome", email, "a");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
+    @Test
+    @DisplayName("Should accept password with special characters")
+    void shouldAcceptPasswordWithSpecialCharacters() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+        registerPage.register("Nome", "Sobrenome", email, "P@ssw0rd!");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
+    @Test
+    @DisplayName("Should accept password with spaces")
+    void shouldAcceptPasswordWithSpaces() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+        registerPage.register("Nome", "Sobrenome", email, "my password");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
+    @Test
+    @DisplayName("Should accept password with maximum valid length (128 characters)")
+    void shouldAcceptPasswordWithMaximumLength() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+        String longPassword = "P".repeat(128);
+
+        registerPage.register("Nome", "Sobrenome", email, longPassword);
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
 
 }
