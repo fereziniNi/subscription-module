@@ -73,4 +73,28 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
         assertThat(loginPage.getPasswordType()).isEqualTo("password");
     }
 
+    @Test
+    @DisplayName("Should display all UI elements correctly on page load")
+    void shouldDisplayAllUIElementsCorrectly() {
+        var authPage = new AuthenticationPageObject(driver);
+
+        final SoftAssertions softly = new SoftAssertions();
+
+        softly.assertThat(authPage.isPageTitleVisible()).isTrue();
+        softly.assertThat(authPage.getPageTitle()).isEqualTo("Login");
+        softly.assertThat(authPage.getPageSubtitle()).isEqualTo("Access your subscription workspace.");
+
+        softly.assertThat(authPage.isEmailFieldVisible()).isTrue();
+        softly.assertThat(authPage.getEmailPlaceholder()).isEqualTo("you@example.com");
+        softly.assertThat(authPage.isPasswordFieldVisible()).isTrue();
+        softly.assertThat(authPage.getPasswordPlaceholder()).isEqualTo("Your password");
+
+        softly.assertThat(authPage.isSubmitButtonVisible()).isTrue();
+        softly.assertThat(authPage.getSubmitButtonText()).isEqualTo("Sign in");
+        softly.assertThat(authPage.isRegisterLinkVisible()).isTrue();
+        softly.assertThat(authPage.getRegisterLinkText()).isEqualTo("Register");
+
+        softly.assertAll();
+    }
+
 }
