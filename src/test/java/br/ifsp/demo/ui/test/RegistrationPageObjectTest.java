@@ -52,7 +52,10 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
 
         registerPage.register("teste", "teste", email,"teste123");
 
-        assertThat(registerPage.pageErrorMessage()).contains("Could not register user.");
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(driver.getCurrentUrl()).contains("/register");
+        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+        softly.assertAll();
     }
     @Test
     @DisplayName("Should display all UI elements correctly on page load")
@@ -133,7 +136,10 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
 
         registerPage.register("", "Sobrenome", email, "senha123");
 
-        assertThat(driver.getCurrentUrl()).contains("/register");
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(driver.getCurrentUrl()).contains("/register");
+        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+        softly.assertAll();
     }
 
     @Test
@@ -144,7 +150,10 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
 
         registerPage.register("Nome", "", email, "senha123");
 
-        assertThat(driver.getCurrentUrl()).contains("/register");
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(driver.getCurrentUrl()).contains("/register");
+        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+        softly.assertAll();
     }
 
     @Test
@@ -165,7 +174,10 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
 
         registerPage.register("Nome", "Sobrenome", email, "");
 
-        assertThat(driver.getCurrentUrl()).contains("/register");
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(driver.getCurrentUrl()).contains("/register");
+        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+        softly.assertAll();
     }
 
     @Test
@@ -175,7 +187,10 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
 
         registerPage.register("", "", "", "");
 
-        assertThat(driver.getCurrentUrl()).contains("/register");
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(driver.getCurrentUrl()).contains("/register");
+        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+        softly.assertAll();
     }
 
 
@@ -198,7 +213,10 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
 
         registerPage.register("Nome", "Sobrenome", email, "senha123");
 
-        assertThat(driver.getCurrentUrl()).contains("/register");
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(driver.getCurrentUrl()).contains("/register");
+        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+        softly.assertAll();
     }
 
     }
