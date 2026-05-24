@@ -117,6 +117,9 @@ public class RegistrationPageObject extends BasePageObject {
     public String getEmailValue() {
         return driver.findElement(EMAIL_INPUT).getAttribute("value");
     }
+    public String getPasswordValue() {
+        return driver.findElement(PASSWORD_INPUT).getAttribute("value");
+    }
 
     public void fillLastname(String lastname) {
         driver.findElement(LASTNAME_INPUT).clear();

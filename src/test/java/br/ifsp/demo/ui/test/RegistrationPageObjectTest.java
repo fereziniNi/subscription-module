@@ -77,7 +77,19 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         softly.assertThat(registerPage.getBackButtonText()).isEqualTo("Back");
 
         softly.assertAll();
+    }
 
+    @Test
+    @DisplayName("Should have empty fields on initial page load")
+    void shouldHaveEmptyFieldsOnInitialLoad() {
+        var registerPage = new RegistrationPageObject(driver);
+
+        final org.assertj.core.api.SoftAssertions softly = new org.assertj.core.api.SoftAssertions();
+        softly.assertThat(registerPage.getNameValue()).isEmpty();
+        softly.assertThat(registerPage.getLastnameValue()).isEmpty();
+        softly.assertThat(registerPage.getEmailValue()).isEmpty();
+        softly.assertThat(registerPage.getPasswordValue()).isEmpty();
+        softly.assertAll();
     }
 
 }
