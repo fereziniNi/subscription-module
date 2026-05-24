@@ -125,6 +125,10 @@ public class RegistrationPageObject extends BasePageObject {
         driver.findElement(LOGIN_LINK).click();
     }
 
+    public void clickBackButton() {
+        driver.findElement(BACK_BUTTON).click();
+    }
+
     public void fillLastname(String lastname) {
         driver.findElement(LASTNAME_INPUT).clear();
         if (lastname != null && !lastname.isEmpty()) {

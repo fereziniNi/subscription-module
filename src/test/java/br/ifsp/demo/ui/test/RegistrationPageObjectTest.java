@@ -1,6 +1,7 @@
 package br.ifsp.demo.ui.test;
 
 import br.ifsp.demo.ui.base.BaseSeleniumTest;
+import br.ifsp.demo.ui.objects.AuthenticationPageObject;
 import br.ifsp.demo.ui.objects.RegistrationPageObject;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
@@ -104,4 +105,22 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         assertThat(driver.getCurrentUrl()).contains("/login");
     }
 
-}
+    @Test
+    @DisplayName("Should navigate back to previous page when clicking Back button")
+    void shouldNavigateBackToPreviousPage() {
+        driver.get("https://subscription-module-seven.vercel.app/login");
+
+        var authPage = new AuthenticationPageObject(driver);
+        var registerPage = authPage.goToRegister();
+        assertThat(driver.getCurrentUrl()).contains("/register");
+
+
+        registerPage.clickBackButton();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
+    }
