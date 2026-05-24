@@ -145,4 +145,25 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         assertThat(driver.getCurrentUrl()).contains("/register");
     }
 
+    @Test
+    @DisplayName("Should not allow registration with empty email")
+    void shouldNotAllowRegistrationWithEmptyEmail() {
+        var registerPage = new RegistrationPageObject(driver);
+
+        registerPage.register("Nome", "Sobrenome", "", "senha123");
+
+        assertThat(driver.getCurrentUrl()).contains("/register");
+    }
+
+    @Test
+    @DisplayName("Should not allow registration with empty password")
+    void shouldNotAllowRegistrationWithEmptyPassword() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+        registerPage.register("Nome", "Sobrenome", email, "");
+
+        assertThat(driver.getCurrentUrl()).contains("/register");
+    }
+
     }
