@@ -15,6 +15,9 @@ public class AuthenticationPageObject extends BasePageObject {
     private static final By SUBMIT_BUTTON = By.cssSelector("button[type='submit']");
     private static final By ERROR_MESSAGE = By.cssSelector(".error");
     private static final By REGISTER_LINK = By.linkText("Register");
+    private static final By PAGE_TITLE = By.cssSelector(".page-title");
+    private static final By PAGE_SUBTITLE = By.cssSelector(".page-subtitle");
+    private static final By AUTH_FOOTER = By.cssSelector(".auth-footer");
 
 
     public AuthenticationPageObject(WebDriver driver) {
@@ -53,7 +56,6 @@ public class AuthenticationPageObject extends BasePageObject {
         return waitForElement(USERNAME_INPUT).getAttribute("value");
     }
 
-
     public String getPasswordValue() {
         return waitForElement(PASSWORD_INPUT).getAttribute("value");
     }
@@ -62,4 +64,47 @@ public class AuthenticationPageObject extends BasePageObject {
         return waitForElement(PASSWORD_INPUT).getAttribute("type");
     }
 
+    public boolean isPageTitleVisible() {
+        return isElementPresent(PAGE_TITLE);
+    }
+
+    public String getPageTitle() {
+        return getText(PAGE_TITLE);
+    }
+
+    public String getPageSubtitle() {
+        return getText(PAGE_SUBTITLE);
+    }
+
+    public boolean isEmailFieldVisible() {
+        return isElementPresent(USERNAME_INPUT);
+    }
+
+    public boolean isPasswordFieldVisible() {
+        return isElementPresent(PASSWORD_INPUT);
+    }
+
+    public String getEmailPlaceholder() {
+        return waitForElement(USERNAME_INPUT).getAttribute("placeholder");
+    }
+
+    public String getPasswordPlaceholder() {
+        return waitForElement(PASSWORD_INPUT).getAttribute("placeholder");
+    }
+
+    public boolean isSubmitButtonVisible() {
+        return isElementPresent(SUBMIT_BUTTON);
+    }
+
+    public String getSubmitButtonText() {
+        return getText(SUBMIT_BUTTON);
+    }
+
+    public boolean isRegisterLinkVisible() {
+        return isElementPresent(REGISTER_LINK);
+    }
+
+    public String getRegisterLinkText() {
+        return getText(REGISTER_LINK);
+    }
 }
