@@ -262,5 +262,48 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         assertThat(driver.getCurrentUrl()).contains("/login");
     }
 
+    @Test
+    @DisplayName("Should accept lastname with minimum valid length (1 character)")
+    void shouldAcceptLastnameWithMinimumLength() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+        registerPage.register("Nome", "S", email, "senha123");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
+    @Test
+    @DisplayName("Should accept lastname with maximum valid length (50 characters)")
+    void shouldAcceptLastnameWithMaximumLength() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+        String longLastname = "S".repeat(50);
+
+        registerPage.register("Nome", longLastname, email, "senha123");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
+    @Test
+    @DisplayName("Should accept compound lastname with spaces")
+    void shouldAcceptCompoundLastnameWithSpaces() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+        registerPage.register("Nome", "da Silva", email, "senha123");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
 
 }
