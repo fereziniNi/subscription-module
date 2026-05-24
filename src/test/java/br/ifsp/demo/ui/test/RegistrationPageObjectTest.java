@@ -166,4 +166,14 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         assertThat(driver.getCurrentUrl()).contains("/register");
     }
 
+    @Test
+    @DisplayName("Should not allow registration with all empty fields")
+    void shouldNotAllowRegistrationWithAllEmptyFields() {
+        var registerPage = new RegistrationPageObject(driver);
+
+        registerPage.register("", "", "", "");
+
+        assertThat(driver.getCurrentUrl()).contains("/register");
+    }
+
     }
