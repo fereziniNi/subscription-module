@@ -92,4 +92,16 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         softly.assertAll();
     }
 
+    @Test
+    @DisplayName("Should navigate to login page when clicking Login link")
+    void shouldNavigateToLoginPageWhenClickingLink() {
+        var registerPage = new RegistrationPageObject(driver);
+        registerPage.clickLoginLink();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
+
 }
