@@ -219,4 +219,18 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         softly.assertAll();
     }
 
+    @Test
+    @DisplayName("Should accept valid email with dots")
+    void shouldAcceptValidEmailWithDots() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "user.name" + System.currentTimeMillis() + "@test.com";
+
+        registerPage.register("Nome", "Sobrenome", email, "senha123");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
     }
+
+}
