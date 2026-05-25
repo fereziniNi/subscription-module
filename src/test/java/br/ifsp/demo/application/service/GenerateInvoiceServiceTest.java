@@ -1,11 +1,11 @@
 package br.ifsp.demo.application.service;
 
 import br.ifsp.demo.model.*;
-import br.ifsp.demo.repository.InvoiceRepository;
 import br.ifsp.demo.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import br.ifsp.demo.repository.InvoiceRepository;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
