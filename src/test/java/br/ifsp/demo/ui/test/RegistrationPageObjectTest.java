@@ -509,5 +509,24 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
 
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "João, Silva, joao@test.com, senha123",
+            "Maria Clara, Santos, maria@test.com, pass456",
+            "A, B, ab@test.com, x",
+            "José-Carlos, Oliveira-Santos, jose@test.com, MyP@ss123"
+    })
+    @DisplayName("Should accept valid registration data in equivalence class")
+    void shouldAcceptValidRegistrationData(String name, String lastname, String email, String password) {
+        var registerPage = new RegistrationPageObject(driver);
+        String uniqueEmail = email.replace("@", System.currentTimeMillis() + "@");
+
+        registerPage.register(name, lastname, uniqueEmail, password);
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
 
 }
