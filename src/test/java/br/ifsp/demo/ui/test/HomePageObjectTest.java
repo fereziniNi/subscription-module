@@ -56,5 +56,21 @@ class HomePageObjectTest extends BaseSeleniumTest {
         softly.assertAll();
     }
 
+    @Test
+    @DisplayName("Should display Back and Logout buttons")
+    void shouldDisplayActionButtons() {
+        var homePage = loginAndNavigateToHome();
+
+        final SoftAssertions softly = new SoftAssertions();
+
+        softly.assertThat(homePage.isBackButtonVisible()).isTrue();
+        softly.assertThat(homePage.getBackButtonText()).isEqualTo("Back");
+
+        softly.assertThat(homePage.isLogoutButtonVisible()).isTrue();
+        softly.assertThat(homePage.getLogoutButtonText()).isEqualTo("Logout");
+
+        softly.assertAll();
+    }
+
 
 }
