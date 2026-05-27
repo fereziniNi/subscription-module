@@ -38,5 +38,23 @@ class HomePageObjectTest extends BaseSeleniumTest {
         softly.assertAll();
     }
 
+    @Test
+    @DisplayName("Should display all menu links correctly")
+    void shouldDisplayAllMenuLinks() {
+        var homePage = loginAndNavigateToHome();
+
+        final SoftAssertions softly = new SoftAssertions();
+
+        softly.assertThat(homePage.isCreateSubscriptionLinkVisible()).isTrue();
+        softly.assertThat(homePage.isViewSubscriptionsLinkVisible()).isTrue();
+        softly.assertThat(homePage.isGenerateInvoiceLinkVisible()).isTrue();
+
+        softly.assertThat(homePage.getCreateSubscriptionLinkHref()).contains("/subscriptions/create");
+        softly.assertThat(homePage.getViewSubscriptionsLinkHref()).contains("/subscriptions");
+        softly.assertThat(homePage.getGenerateInvoiceLinkHref()).contains("/invoices");
+
+        softly.assertAll();
+    }
+
 
 }
