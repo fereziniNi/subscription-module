@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 
 public class HomePageObject extends BasePageObject {
     private static final By PAGE_TITLE = By.cssSelector(".page-title");
+    private static final By PAGE_SUBTITLE = By.cssSelector(".page-subtitle");
     private static final By LOGOUT_BUTTON = By.cssSelector("button.danger");
     private static final By CREATE_SUBSCRIPTION_LINK = By.linkText("Create subscription");
     private static final By VIEW_SUBSCRIPTIONS_LINK = By.linkText("View subscriptions");
@@ -23,6 +24,8 @@ public class HomePageObject extends BasePageObject {
     public String getPageTitle() {
         return getText(PAGE_TITLE);
     }
+
+    public String getPageSubtitle() { return getText(PAGE_SUBTITLE); }
 
     public boolean isLogoutButtonVisible() {
         return isElementPresent(LOGOUT_BUTTON);
