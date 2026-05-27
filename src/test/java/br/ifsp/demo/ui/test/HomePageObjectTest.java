@@ -119,4 +119,18 @@ class HomePageObjectTest extends BaseSeleniumTest {
 
         assertThat(driver.getCurrentUrl()).contains("/login");
     }
+
+    @Test
+    @DisplayName("Should have data-discover attribute on menu links")
+    void shouldHaveDataDiscoverAttributeOnLinks() {
+        var homePage = loginAndNavigateToHome();
+
+        final SoftAssertions softly = new SoftAssertions();
+
+        softly.assertThat(homePage.hasDataDiscoverAttribute("Create subscription")).isTrue();
+        softly.assertThat(homePage.hasDataDiscoverAttribute("View subscriptions")).isTrue();
+        softly.assertThat(homePage.hasDataDiscoverAttribute("Generate invoice")).isTrue();
+
+        softly.assertAll();
+    }
 }

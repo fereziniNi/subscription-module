@@ -65,4 +65,14 @@ public class HomePageObject extends BasePageObject {
     public void goToGenerateInvoice() {
         click(GENERATE_INVOICE_LINK);
     }
+
+    public boolean hasDataDiscoverAttribute(String linkText) {
+        try {
+            var element = driver.findElement(By.linkText(linkText));
+            String attr = element.getAttribute("data-discover");
+            return "true".equals(attr);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
