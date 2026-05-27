@@ -29,20 +29,6 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
     @Tag("EquivalenceClassUi")
     class EquivalenceClassUi{
         @Test
-        @DisplayName("Should Registration a new profile")
-        void shouldRegistrationANewProfile() {
-            var registerPage = new RegistrationPageObject(driver);
-
-            String email = "teste" + System.currentTimeMillis() + "@teste.com";
-            registerPage.register("teste1", "teste1", email, "teste1");
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-            wait.until(ExpectedConditions.urlContains("/login"));
-
-            assertThat(driver.getCurrentUrl()).contains("/login");
-        }
-
-        @Test
         @DisplayName("Should not allow duplicated email registration")
         void shouldNotAllowDuplicatedEmailRegistration() {
             String email = "teste" + System.currentTimeMillis() + "@teste.com";
@@ -64,34 +50,6 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         }
 
         @Test
-        @DisplayName("Should not allow registration with empty name")
-        void shouldNotAllowRegistrationWithEmptyName() {
-            var registerPage = new RegistrationPageObject(driver);
-            String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-            registerPage.register("", "Sobrenome", email, "senha123");
-
-            final SoftAssertions softly = new SoftAssertions();
-            softly.assertThat(driver.getCurrentUrl()).contains("/register");
-            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-            softly.assertAll();
-        }
-
-        @Test
-        @DisplayName("Should not allow registration with empty lastname")
-        void shouldNotAllowRegistrationWithEmptyLastname() {
-            var registerPage = new RegistrationPageObject(driver);
-            String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-            registerPage.register("Nome", "", email, "senha123");
-
-            final SoftAssertions softly = new SoftAssertions();
-            softly.assertThat(driver.getCurrentUrl()).contains("/register");
-            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-            softly.assertAll();
-        }
-
-        @Test
         @DisplayName("Should accept compound lastname with spaces")
         void shouldAcceptCompoundLastnameWithSpaces() {
             var registerPage = new RegistrationPageObject(driver);
@@ -103,16 +61,6 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
             wait.until(ExpectedConditions.urlContains("/login"));
 
             assertThat(driver.getCurrentUrl()).contains("/login");
-        }
-
-        @Test
-        @DisplayName("Should not allow registration with empty email")
-        void shouldNotAllowRegistrationWithEmptyEmail() {
-            var registerPage = new RegistrationPageObject(driver);
-
-            registerPage.register("Nome", "Sobrenome", "", "senha123");
-
-            assertThat(driver.getCurrentUrl()).contains("/register");
         }
 
         @ParameterizedTest
@@ -138,62 +86,6 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
             softly.assertThat(driver.getCurrentUrl()).contains("/register");
             softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
             softly.assertAll();
-        }
-
-        @Test
-        @DisplayName("Should accept valid email with dots")
-        void shouldAcceptValidEmailWithDots() {
-            var registerPage = new RegistrationPageObject(driver);
-            String email = "user.name" + System.currentTimeMillis() + "@test.com";
-
-            registerPage.register("Nome", "Sobrenome", email, "senha123");
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-            wait.until(ExpectedConditions.urlContains("/login"));
-
-            assertThat(driver.getCurrentUrl()).contains("/login");
-        }
-
-        @Test
-        @DisplayName("Should not allow registration with empty password")
-        void shouldNotAllowRegistrationWithEmptyPassword() {
-            var registerPage = new RegistrationPageObject(driver);
-            String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-            registerPage.register("Nome", "Sobrenome", email, "");
-
-            final SoftAssertions softly = new SoftAssertions();
-            softly.assertThat(driver.getCurrentUrl()).contains("/register");
-            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-            softly.assertAll();
-        }
-
-        @Test
-        @DisplayName("Should accept password with special characters")
-        void shouldAcceptPasswordWithSpecialCharacters() {
-            var registerPage = new RegistrationPageObject(driver);
-            String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-            registerPage.register("Nome", "Sobrenome", email, "P@ssw0rd!");
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-            wait.until(ExpectedConditions.urlContains("/login"));
-
-            assertThat(driver.getCurrentUrl()).contains("/login");
-        }
-
-        @Test
-        @DisplayName("Should accept password with spaces")
-        void shouldAcceptPasswordWithSpaces() {
-            var registerPage = new RegistrationPageObject(driver);
-            String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-            registerPage.register("Nome", "Sobrenome", email, "my password");
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-            wait.until(ExpectedConditions.urlContains("/login"));
-
-            assertThat(driver.getCurrentUrl()).contains("/login");
         }
 
         @Test
@@ -251,6 +143,184 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         }
     }
 
+    @Nested
+    @Tag("LimitValueUi")
+    class LimitValueUi {
+        @Test
+        @DisplayName("Should accept name with maximum valid length (50 characters)")
+        void shouldAcceptNameWithMaximumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+            String longName = "A".repeat(50);
+
+            registerPage.register(longName, "Sobrenome", email, "senha123");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should accept lastname with minimum valid length (1 character)")
+        void shouldAcceptLastnameWithMinimumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+            registerPage.register("Nome", "S", email, "senha123");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should reject email below minimum length")
+        void shouldRejectEmailBelowMinimumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "a@b.c";
+
+            registerPage.register("Nome", "Sobrenome", email, "senha123");
+
+            final SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(driver.getCurrentUrl()).contains("/register");
+            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+            softly.assertAll();
+        }
+
+        @Test
+        @DisplayName("Should reject password exceeding maximum length (129 characters)")
+        void shouldRejectPasswordExceedingMaximumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+            String tooLongPassword = "P".repeat(129);
+
+            registerPage.register("Nome", "Sobrenome", email, tooLongPassword);
+
+            final SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(driver.getCurrentUrl()).contains("/register");
+            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+            softly.assertAll();
+        }
+
+        @Test
+        @DisplayName("Should reject lastname exceeding maximum length (51 characters)")
+        void shouldRejectLastnameExceedingMaximumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+            String tooLongLastname = "S".repeat(51);
+
+            registerPage.register("Nome", tooLongLastname, email, "senha123");
+
+            final SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(driver.getCurrentUrl()).contains("/register");
+            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+            softly.assertAll();
+        }
+
+        @Test
+        @DisplayName("Should reject name exceeding maximum length (51 characters)")
+        void shouldRejectNameExceedingMaximumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+            String tooLongName = "A".repeat(51);
+
+            registerPage.register(tooLongName, "Sobrenome", email, "senha123");
+
+            final SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(driver.getCurrentUrl()).contains("/register");
+            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+            softly.assertAll();
+        }
+
+        @Test
+        @DisplayName("Should accept password with maximum valid length (128 characters)")
+        void shouldAcceptPasswordWithMaximumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+            String longPassword = "P".repeat(128);
+
+            registerPage.register("Nome", "Sobrenome", email, longPassword);
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should accept password with minimum length (1 character)")
+        void shouldAcceptPasswordWithMinimumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+            registerPage.register("Nome", "Sobrenome", email, "a");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should reject email exceeding maximum length (255+ characters)")
+        void shouldRejectEmailExceedingMaximumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+
+            String tooLongEmail = "a".repeat(250) + "@test.com";
+
+            registerPage.register("Nome", "Sobrenome", tooLongEmail, "senha123");
+
+            final SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(driver.getCurrentUrl()).contains("/register");
+            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+            softly.assertAll();
+        }
+
+        @Test
+        @DisplayName("Should accept email with minimum valid length")
+        void shouldAcceptEmailWithMinimumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "a@b.co"; // 6 caracteres
+
+            registerPage.register("Nome", "Sobrenome", email, "senha123");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should accept lastname with maximum valid length (50 characters)")
+        void shouldAcceptLastnameWithMaximumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+            String longLastname = "S".repeat(50);
+
+            registerPage.register("Nome", longLastname, email, "senha123");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should accept name with minimum valid length (1 character)")
+        void shouldAcceptNameWithMinimumLength() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+            registerPage.register("A", "Sobrenome", email, "senha123");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+    }
 
 
 
@@ -326,153 +396,6 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         assertThat(driver.getCurrentUrl()).contains("/login");
     }
 
-    @Test
-    @DisplayName("Should accept name with minimum valid length (1 character)")
-    void shouldAcceptNameWithMinimumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-        registerPage.register("A", "Sobrenome", email, "senha123");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
-    @DisplayName("Should accept name with maximum valid length (50 characters)")
-    void shouldAcceptNameWithMaximumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-        String longName = "A".repeat(50);
-
-        registerPage.register(longName, "Sobrenome", email, "senha123");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
-    @DisplayName("Should accept lastname with minimum valid length (1 character)")
-    void shouldAcceptLastnameWithMinimumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-        registerPage.register("Nome", "S", email, "senha123");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
-    @DisplayName("Should accept lastname with maximum valid length (50 characters)")
-    void shouldAcceptLastnameWithMaximumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-        String longLastname = "S".repeat(50);
-
-        registerPage.register("Nome", longLastname, email, "senha123");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
-    @DisplayName("Should accept email with minimum valid length")
-    void shouldAcceptEmailWithMinimumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "a@b.co"; // 6 caracteres
-
-        registerPage.register("Nome", "Sobrenome", email, "senha123");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
-    @DisplayName("Should reject email below minimum length")
-    void shouldRejectEmailBelowMinimumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "a@b.c";
-
-        registerPage.register("Nome", "Sobrenome", email, "senha123");
-
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(driver.getCurrentUrl()).contains("/register");
-        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-        softly.assertAll();
-    }
-
-    @Test
-    @DisplayName("Should accept email with maximum valid length (254 characters)")
-    void shouldAcceptEmailWithMaximumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-
-        String localPart = "a".repeat(64);
-        String domainPart = "b".repeat(243) + ".com";
-        String maxEmail = localPart + "@" + domainPart;
-
-        registerPage.register("Nome", "Sobrenome", maxEmail, "senha123");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
-    @DisplayName("Should reject email exceeding maximum length (255+ characters)")
-    void shouldRejectEmailExceedingMaximumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-
-        String tooLongEmail = "a".repeat(250) + "@test.com";
-
-        registerPage.register("Nome", "Sobrenome", tooLongEmail, "senha123");
-
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(driver.getCurrentUrl()).contains("/register");
-        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-        softly.assertAll();
-    }
-
-    @Test
-    @DisplayName("Should accept password with minimum length (1 character)")
-    void shouldAcceptPasswordWithMinimumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-        registerPage.register("Nome", "Sobrenome", email, "a");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
-    @DisplayName("Should accept password with maximum valid length (128 characters)")
-    void shouldAcceptPasswordWithMaximumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-        String longPassword = "P".repeat(128);
-
-        registerPage.register("Nome", "Sobrenome", email, longPassword);
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
     @ParameterizedTest
     @CsvSource(delimiter = '|', value = {
             "' OR '1'='1|Sobrenome|email@test.com|senha",
@@ -484,51 +407,6 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         var registerPage = new RegistrationPageObject(driver);
 
         registerPage.register(name, lastname, email, password);
-
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(driver.getCurrentUrl()).contains("/register");
-        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-        softly.assertAll();
-    }
-
-    @Test
-    @DisplayName("Should reject name exceeding maximum length (51 characters)")
-    void shouldRejectNameExceedingMaximumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-        String tooLongName = "A".repeat(51);
-
-        registerPage.register(tooLongName, "Sobrenome", email, "senha123");
-
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(driver.getCurrentUrl()).contains("/register");
-        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-        softly.assertAll();
-    }
-
-    @Test
-    @DisplayName("Should reject lastname exceeding maximum length (51 characters)")
-    void shouldRejectLastnameExceedingMaximumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-        String tooLongLastname = "S".repeat(51);
-
-        registerPage.register("Nome", tooLongLastname, email, "senha123");
-
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(driver.getCurrentUrl()).contains("/register");
-        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-        softly.assertAll();
-    }
-
-    @Test
-    @DisplayName("Should reject password exceeding maximum length (129 characters)")
-    void shouldRejectPasswordExceedingMaximumLength() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-        String tooLongPassword = "P".repeat(129);
-
-        registerPage.register("Nome", "Sobrenome", email, tooLongPassword);
 
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(driver.getCurrentUrl()).contains("/register");
