@@ -5,6 +5,7 @@ import br.ifsp.demo.ui.base.BaseSeleniumTest;
 import br.ifsp.demo.ui.objects.AuthenticationPageObject;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -14,6 +15,7 @@ import org.openqa.selenium.WebElement;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+@Tag("Ui")
 public class AuthenticationPageObjectTest extends BaseSeleniumTest {
     private static final String URL = "https://subscription-module-seven.vercel.app/login";
 
@@ -122,5 +124,4 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
 
         assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
     }
-
-    }
+}
