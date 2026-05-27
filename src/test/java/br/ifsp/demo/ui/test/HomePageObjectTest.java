@@ -106,4 +106,17 @@ class HomePageObjectTest extends BaseSeleniumTest {
         wait.until(ExpectedConditions.urlContains("/invoices"));
         assertThat(driver.getCurrentUrl()).contains("/invoices");
     }
+
+    @Test
+    @DisplayName("Should logout when clicking Logout button")
+    void shouldLogoutWhenClickingLogoutButton() {
+        var homePage = loginAndNavigateToHome();
+
+        homePage.logout();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+    }
 }
