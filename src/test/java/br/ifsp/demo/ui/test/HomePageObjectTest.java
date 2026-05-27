@@ -6,7 +6,12 @@ import br.ifsp.demo.ui.objects.HomePageObject;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HomePageObjectTest extends BaseSeleniumTest {
@@ -70,6 +75,16 @@ class HomePageObjectTest extends BaseSeleniumTest {
         softly.assertThat(homePage.getLogoutButtonText()).isEqualTo("Logout");
 
         softly.assertAll();
+    }
+
+    @Test
+   @DisplayName("Should navigate to Create Subscription page when clicking the link")
+   void shouldNavigateToCreateSubscription() {
+        var homePage = loginAndNavigateToHome();
+        homePage.goToCreateSubscription();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.urlContains("/subscriptions/create"));
+        assertThat(driver.getCurrentUrl()).contains("/subscriptions/create");
     }
 
 
