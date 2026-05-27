@@ -440,5 +440,34 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         softly.assertAll();
     }
 
+    @Test
+    @DisplayName("Should reject name exceeding maximum length (51 characters)")
+    void shouldRejectNameExceedingMaximumLength() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+        String tooLongName = "A".repeat(51);
+
+        registerPage.register(tooLongName, "Sobrenome", email, "senha123");
+
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(driver.getCurrentUrl()).contains("/register");
+        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+        softly.assertAll();
+    }
+
+    @Test
+    @DisplayName("Should reject lastname exceeding maximum length (51 characters)")
+    void shouldRejectLastnameExceedingMaximumLength() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+        String tooLongLastname = "S".repeat(51);
+
+        registerPage.register("Nome", tooLongLastname, email, "senha123");
+
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(driver.getCurrentUrl()).contains("/register");
+        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+        softly.assertAll();
+    }
 
 }
