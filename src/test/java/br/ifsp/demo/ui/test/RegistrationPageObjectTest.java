@@ -5,6 +5,8 @@ import br.ifsp.demo.ui.objects.AuthenticationPageObject;
 import br.ifsp.demo.ui.objects.RegistrationPageObject;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -23,40 +25,235 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         driver.get(URL);
     }
 
-    @Test
-    @DisplayName("Should Registration a new profile")
-    void shouldRegistrationANewProfile() {
-        var registerPage = new RegistrationPageObject(driver);
+    @Nested
+    @Tag("EquivalenceClassUi")
+    class EquivalenceClassUi{
+        @Test
+        @DisplayName("Should Registration a new profile")
+        void shouldRegistrationANewProfile() {
+            var registerPage = new RegistrationPageObject(driver);
 
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-        registerPage.register("teste1", "teste1", email, "teste1");
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+            registerPage.register("teste1", "teste1", email, "teste1");
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
 
-        assertThat(driver.getCurrentUrl()).contains("/login");
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should not allow duplicated email registration")
+        void shouldNotAllowDuplicatedEmailRegistration() {
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+            var registerPage = new RegistrationPageObject(driver);
+
+            registerPage.register("teste", "teste", email, "teste123");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            driver.get("https://subscription-module-seven.vercel.app/register");
+
+            registerPage.register("teste", "teste", email, "teste123");
+
+            final SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(driver.getCurrentUrl()).contains("/register");
+            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+            softly.assertAll();
+        }
+
+        @Test
+        @DisplayName("Should not allow registration with empty name")
+        void shouldNotAllowRegistrationWithEmptyName() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+            registerPage.register("", "Sobrenome", email, "senha123");
+
+            final SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(driver.getCurrentUrl()).contains("/register");
+            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+            softly.assertAll();
+        }
+
+        @Test
+        @DisplayName("Should not allow registration with empty lastname")
+        void shouldNotAllowRegistrationWithEmptyLastname() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+            registerPage.register("Nome", "", email, "senha123");
+
+            final SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(driver.getCurrentUrl()).contains("/register");
+            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+            softly.assertAll();
+        }
+
+        @Test
+        @DisplayName("Should accept compound lastname with spaces")
+        void shouldAcceptCompoundLastnameWithSpaces() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+            registerPage.register("Nome", "da Silva", email, "senha123");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should not allow registration with empty email")
+        void shouldNotAllowRegistrationWithEmptyEmail() {
+            var registerPage = new RegistrationPageObject(driver);
+
+            registerPage.register("Nome", "Sobrenome", "", "senha123");
+
+            assertThat(driver.getCurrentUrl()).contains("/register");
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+                "usuario@",
+                "@dominio.com",
+                "usuario@dominio",
+                "user @test.com",
+                "user#$%@test.com",
+                "..@test.com",
+                "user..name@test.com",
+                ".user@test.com",
+                "user.@test.com",
+                "usuariodominio.com"
+        })
+        @DisplayName("Should reject malformed email formats")
+        void shouldRejectMalformedEmailFormats(String email) {
+            var registerPage = new RegistrationPageObject(driver);
+
+            registerPage.register("Nome", "Sobrenome", email, "senha123");
+
+            final SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(driver.getCurrentUrl()).contains("/register");
+            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+            softly.assertAll();
+        }
+
+        @Test
+        @DisplayName("Should accept valid email with dots")
+        void shouldAcceptValidEmailWithDots() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "user.name" + System.currentTimeMillis() + "@test.com";
+
+            registerPage.register("Nome", "Sobrenome", email, "senha123");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should not allow registration with empty password")
+        void shouldNotAllowRegistrationWithEmptyPassword() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+            registerPage.register("Nome", "Sobrenome", email, "");
+
+            final SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(driver.getCurrentUrl()).contains("/register");
+            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+            softly.assertAll();
+        }
+
+        @Test
+        @DisplayName("Should accept password with special characters")
+        void shouldAcceptPasswordWithSpecialCharacters() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+            registerPage.register("Nome", "Sobrenome", email, "P@ssw0rd!");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should accept password with spaces")
+        void shouldAcceptPasswordWithSpaces() {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+            registerPage.register("Nome", "Sobrenome", email, "my password");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should not allow registration with all empty fields")
+        void shouldNotAllowRegistrationWithAllEmptyFields() {
+            var registerPage = new RegistrationPageObject(driver);
+
+            registerPage.register("", "", "", "");
+
+            final SoftAssertions softly = new SoftAssertions();
+            softly.assertThat(driver.getCurrentUrl()).contains("/register");
+            softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+            softly.assertAll();
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+                "João, Silva, joao@test.com, senha123",
+                "Maria Clara, Santos, maria@test.com, pass456",
+                "A, B, ab@test.com, x",
+                "José-Carlos, Oliveira-Santos, jose@test.com, MyP@ss123"
+        })
+        @DisplayName("Should accept valid registration data in equivalence class")
+        void shouldAcceptValidRegistrationData(String name, String lastname, String email, String password) {
+            var registerPage = new RegistrationPageObject(driver);
+            String uniqueEmail = email.replace("@", System.currentTimeMillis() + "@");
+
+            registerPage.register(name, lastname, uniqueEmail, password);
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+                "password123",
+                "P@ssw0rd!",
+                "12345678",
+                "my password with spaces",
+                "パスワード"
+        })
+        @DisplayName("Should accept various password formats in equivalence class")
+        void shouldAcceptVariousPasswordFormats(String password) {
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+            registerPage.register("Nome", "Sobrenome", email, password);
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
     }
 
-    @Test
-    @DisplayName("Should not allow duplicated email registration")
-    void shouldNotAllowDuplicatedEmailRegistration() {
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-        var registerPage = new RegistrationPageObject(driver);
 
-        registerPage.register("teste", "teste", email, "teste123");
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
 
-        driver.get("https://subscription-module-seven.vercel.app/register");
-
-        registerPage.register("teste", "teste", email, "teste123");
-
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(driver.getCurrentUrl()).contains("/register");
-        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-        softly.assertAll();
-    }
 
     @Test
     @DisplayName("Should display all UI elements correctly on page load")
@@ -130,111 +327,6 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
     }
 
     @Test
-    @DisplayName("Should not allow registration with empty name")
-    void shouldNotAllowRegistrationWithEmptyName() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-        registerPage.register("", "Sobrenome", email, "senha123");
-
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(driver.getCurrentUrl()).contains("/register");
-        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-        softly.assertAll();
-    }
-
-    @Test
-    @DisplayName("Should not allow registration with empty lastname")
-    void shouldNotAllowRegistrationWithEmptyLastname() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-        registerPage.register("Nome", "", email, "senha123");
-
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(driver.getCurrentUrl()).contains("/register");
-        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-        softly.assertAll();
-    }
-
-    @Test
-    @DisplayName("Should not allow registration with empty email")
-    void shouldNotAllowRegistrationWithEmptyEmail() {
-        var registerPage = new RegistrationPageObject(driver);
-
-        registerPage.register("Nome", "Sobrenome", "", "senha123");
-
-        assertThat(driver.getCurrentUrl()).contains("/register");
-    }
-
-    @Test
-    @DisplayName("Should not allow registration with empty password")
-    void shouldNotAllowRegistrationWithEmptyPassword() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-        registerPage.register("Nome", "Sobrenome", email, "");
-
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(driver.getCurrentUrl()).contains("/register");
-        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-        softly.assertAll();
-    }
-
-    @Test
-    @DisplayName("Should not allow registration with all empty fields")
-    void shouldNotAllowRegistrationWithAllEmptyFields() {
-        var registerPage = new RegistrationPageObject(driver);
-
-        registerPage.register("", "", "", "");
-
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(driver.getCurrentUrl()).contains("/register");
-        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-        softly.assertAll();
-    }
-
-
-    @ParameterizedTest
-    @CsvSource({
-            "usuario@",
-            "@dominio.com",
-            "usuario@dominio",
-            "user @test.com",
-            "user#$%@test.com",
-            "..@test.com",
-            "user..name@test.com",
-            ".user@test.com",
-            "user.@test.com",
-            "usuariodominio.com"
-    })
-    @DisplayName("Should reject malformed email formats")
-    void shouldRejectMalformedEmailFormats(String email) {
-        var registerPage = new RegistrationPageObject(driver);
-
-        registerPage.register("Nome", "Sobrenome", email, "senha123");
-
-        final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(driver.getCurrentUrl()).contains("/register");
-        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
-        softly.assertAll();
-    }
-
-    @Test
-    @DisplayName("Should accept valid email with dots")
-    void shouldAcceptValidEmailWithDots() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "user.name" + System.currentTimeMillis() + "@test.com";
-
-        registerPage.register("Nome", "Sobrenome", email, "senha123");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
     @DisplayName("Should accept name with minimum valid length (1 character)")
     void shouldAcceptNameWithMinimumLength() {
         var registerPage = new RegistrationPageObject(driver);
@@ -285,20 +377,6 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         String longLastname = "S".repeat(50);
 
         registerPage.register("Nome", longLastname, email, "senha123");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
-    @DisplayName("Should accept compound lastname with spaces")
-    void shouldAcceptCompoundLastnameWithSpaces() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-        registerPage.register("Nome", "da Silva", email, "senha123");
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.urlContains("/login"));
@@ -373,34 +451,6 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         String email = "teste" + System.currentTimeMillis() + "@teste.com";
 
         registerPage.register("Nome", "Sobrenome", email, "a");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
-    @DisplayName("Should accept password with special characters")
-    void shouldAcceptPasswordWithSpecialCharacters() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-        registerPage.register("Nome", "Sobrenome", email, "P@ssw0rd!");
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
-    @DisplayName("Should accept password with spaces")
-    void shouldAcceptPasswordWithSpaces() {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-        registerPage.register("Nome", "Sobrenome", email, "my password");
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.urlContains("/login"));
@@ -485,48 +535,4 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
         softly.assertAll();
     }
-
-    @ParameterizedTest
-    @CsvSource({
-            "password123",
-            "P@ssw0rd!",
-            "12345678",
-            "my password with spaces",
-            "パスワード"
-    })
-    @DisplayName("Should accept various password formats in equivalence class")
-    void shouldAcceptVariousPasswordFormats(String password) {
-        var registerPage = new RegistrationPageObject(driver);
-        String email = "teste" + System.currentTimeMillis() + "@teste.com";
-
-        registerPage.register("Nome", "Sobrenome", email, password);
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-
-
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "João, Silva, joao@test.com, senha123",
-            "Maria Clara, Santos, maria@test.com, pass456",
-            "A, B, ab@test.com, x",
-            "José-Carlos, Oliveira-Santos, jose@test.com, MyP@ss123"
-    })
-    @DisplayName("Should accept valid registration data in equivalence class")
-    void shouldAcceptValidRegistrationData(String name, String lastname, String email, String password) {
-        var registerPage = new RegistrationPageObject(driver);
-        String uniqueEmail = email.replace("@", System.currentTimeMillis() + "@");
-
-        registerPage.register(name, lastname, uniqueEmail, password);
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
 }
