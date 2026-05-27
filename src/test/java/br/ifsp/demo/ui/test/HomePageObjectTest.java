@@ -87,5 +87,13 @@ class HomePageObjectTest extends BaseSeleniumTest {
         assertThat(driver.getCurrentUrl()).contains("/subscriptions/create");
     }
 
-
+    @Test
+    @DisplayName("Should navigate to View Subscriptions page when clicking the link")
+    void shouldNavigateToViewSubscriptions() {
+        var homePage = loginAndNavigateToHome();
+        homePage.goToCreateSubscription();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.urlContains("/subscriptions"));
+        assertThat(driver.getCurrentUrl()).contains("/subscriptions");
+    }
 }
