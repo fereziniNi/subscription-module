@@ -31,6 +31,18 @@ public class HomePageObject extends BasePageObject {
         return isElementPresent(LOGOUT_BUTTON);
     }
 
+    public boolean isCreateSubscriptionLinkVisible() { return isElementPresent(CREATE_SUBSCRIPTION_LINK); }
+
+    public boolean isViewSubscriptionsLinkVisible() { return isElementPresent(VIEW_SUBSCRIPTIONS_LINK); }
+
+    public boolean isGenerateInvoiceLinkVisible() { return isElementPresent(GENERATE_INVOICE_LINK); }
+
+    public String getCreateSubscriptionLinkHref() { return waitForElement(CREATE_SUBSCRIPTION_LINK).getAttribute("href"); }
+
+    public String getViewSubscriptionsLinkHref() { return waitForElement(VIEW_SUBSCRIPTIONS_LINK).getAttribute("href"); }
+
+    public String getGenerateInvoiceLinkHref() { return waitForElement(GENERATE_INVOICE_LINK).getAttribute("href"); }
+
     public void logout() {
         click(LOGOUT_BUTTON);
     }
