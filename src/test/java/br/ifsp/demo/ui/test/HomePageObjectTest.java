@@ -91,9 +91,19 @@ class HomePageObjectTest extends BaseSeleniumTest {
     @DisplayName("Should navigate to View Subscriptions page when clicking the link")
     void shouldNavigateToViewSubscriptions() {
         var homePage = loginAndNavigateToHome();
-        homePage.goToCreateSubscription();
+        homePage.goToViewSubscriptions();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
         wait.until(ExpectedConditions.urlContains("/subscriptions"));
         assertThat(driver.getCurrentUrl()).contains("/subscriptions");
+    }
+
+    @Test
+    @DisplayName("Should navigate to Generate Invoice page when clicking the link")
+    void shouldNavigateToGenerateInvoice() {
+        var homePage = loginAndNavigateToHome();
+        homePage.goToGenerateInvoice();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.urlContains("/invoices"));
+        assertThat(driver.getCurrentUrl()).contains("/invoices");
     }
 }
