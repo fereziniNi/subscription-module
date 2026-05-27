@@ -470,4 +470,20 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         softly.assertAll();
     }
 
+    @Test
+    @DisplayName("Should reject password exceeding maximum length (129 characters)")
+    void shouldRejectPasswordExceedingMaximumLength() {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+        String tooLongPassword = "P".repeat(129);
+
+        registerPage.register("Nome", "Sobrenome", email, tooLongPassword);
+
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(driver.getCurrentUrl()).contains("/register");
+        softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
+        softly.assertAll();
+    }
+
+
 }
