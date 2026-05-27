@@ -54,6 +54,9 @@ public class HomePageObject extends BasePageObject {
         click(LOGOUT_BUTTON);
     }
 
+    public void clickBackButton() {click(BACK_BUTTON);}
+
+
     public void goToCreateSubscription() {
         click(CREATE_SUBSCRIPTION_LINK);
     }

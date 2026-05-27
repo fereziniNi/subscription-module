@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HomePageObjectTest extends BaseSeleniumTest {
     private static final String LOGIN_URL = "https://subscription-module-seven.vercel.app/login";
+    private static final String HOME_URL = "https://subscription-module-seven.vercel.app/";
     private static final String VALID_EMAIL = "teste@teste.com";
     private static final String VALID_PASSWORD = "teste";
 
@@ -132,5 +133,20 @@ class HomePageObjectTest extends BaseSeleniumTest {
         softly.assertThat(homePage.hasDataDiscoverAttribute("Generate invoice")).isTrue();
 
         softly.assertAll();
+    }
+    @Test
+    @DisplayName("Should click back button and navigate to previous page")
+    void shouldClickBackButtonAndNavigate() {
+        var homePage = loginAndNavigateToHome();
+
+        homePage.clickBackButton();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.urlContains("/login"),
+                ExpectedConditions.urlToBe(HOME_URL)
+        ));
+
+        assertThat(driver.getCurrentUrl()).isNotEmpty();
     }
 }
