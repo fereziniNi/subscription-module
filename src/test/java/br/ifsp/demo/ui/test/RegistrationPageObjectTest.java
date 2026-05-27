@@ -43,20 +43,21 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         String email = "teste" + System.currentTimeMillis() + "@teste.com";
         var registerPage = new RegistrationPageObject(driver);
 
-        registerPage.register("teste","teste",email,"teste123");
+        registerPage.register("teste", "teste", email, "teste123");
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.urlContains("/login"));
 
         driver.get("https://subscription-module-seven.vercel.app/register");
 
-        registerPage.register("teste", "teste", email,"teste123");
+        registerPage.register("teste", "teste", email, "teste123");
 
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(driver.getCurrentUrl()).contains("/register");
         softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
         softly.assertAll();
     }
+
     @Test
     @DisplayName("Should display all UI elements correctly on page load")
     void shouldDisplayAllUIElementsCorrectly() {
@@ -483,6 +484,29 @@ public class RegistrationPageObjectTest extends BaseSeleniumTest {
         softly.assertThat(driver.getCurrentUrl()).contains("/register");
         softly.assertThat(registerPage.pageErrorMessage()).isEqualTo("Could not register user.");
         softly.assertAll();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "password123",
+            "P@ssw0rd!",
+            "12345678",
+            "my password with spaces",
+            "パスワード"
+    })
+    @DisplayName("Should accept various password formats in equivalence class")
+    void shouldAcceptVariousPasswordFormats(String password) {
+        var registerPage = new RegistrationPageObject(driver);
+        String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+        registerPage.register("Nome", "Sobrenome", email, password);
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+        wait.until(ExpectedConditions.urlContains("/login"));
+
+        assertThat(driver.getCurrentUrl()).contains("/login");
+
+
     }
 
 
