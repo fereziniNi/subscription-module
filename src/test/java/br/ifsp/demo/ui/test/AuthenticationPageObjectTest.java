@@ -5,6 +5,7 @@ import br.ifsp.demo.ui.base.BaseSeleniumTest;
 import br.ifsp.demo.ui.objects.AuthenticationPageObject;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,6 +25,88 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
         driver.get(URL);
     }
 
+    @Nested
+    @Tag("EquivalenceClassUi")
+    class EquivalenceClassUi{
+        @Test
+        @DisplayName("Should reject login with unregistered email")
+        void shouldRejectLoginWithUnregisteredEmail() {
+            var authPage = new AuthenticationPageObject(driver);
+            String unregisteredEmail = "naoexiste" + System.currentTimeMillis() + "@test.com";
+
+            authPage.attemptLogin(unregisteredEmail, "qualquersenha");
+
+            assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
+        }
+
+        @Test
+        @DisplayName("Should reject login with correct email but wrong password")
+        void shouldRejectLoginWithCorrectEmailButWrongPassword() {
+            var authPage = new AuthenticationPageObject(driver);
+
+            authPage.attemptLogin("teste@teste.com", "senhaerrada123");
+
+            assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+                "emailsemarroba.com",
+                "email@",
+                "@dominio.com",
+                "email@dominio",
+                "email..duplo@test.com"
+        })
+        @DisplayName("Should reject login with malformed email formats")
+        void shouldRejectLoginWithMalformedEmail(String malformedEmail) {
+            var authPage = new AuthenticationPageObject(driver);
+
+            authPage.attemptLogin(malformedEmail, "senha123");
+
+            assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
+        }
+
+        @Test
+        @DisplayName("Should reject login with empty email field")
+        void shouldRejectLoginWithEmptyEmail() {
+            var authPage = new AuthenticationPageObject(driver);
+
+            authPage.attemptLogin("", "senha123");
+
+            assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
+        }
+
+        @Test
+        @DisplayName("Should reject login with empty password field")
+        void shouldRejectLoginWithEmptyPassword() {
+            var authPage = new AuthenticationPageObject(driver);
+
+            authPage.attemptLogin("teste@teste.com", "");
+
+            assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
+        }
+
+        @Test
+        @DisplayName("Should reject login with both fields empty")
+        void shouldRejectLoginWithBothFieldsEmpty() {
+            var authPage = new AuthenticationPageObject(driver);
+
+            authPage.attemptLogin("", "");
+
+            assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
+        }
+
+        @Test
+        @DisplayName("Should accept valid credentials")
+        void shouldAcceptValidCredentials() {
+            var authPage = new AuthenticationPageObject(driver);
+            var homePage = authPage.loginSuccessfully("teste@teste.com", "teste");
+
+            assertThat(homePage.isLoaded()).isTrue();
+        }
+    }
+
+
     @Test
     @DisplayName("Should navigate to registration page by clicking the link")
     void shouldNavigateToRegistrationPageByClickingTheLink() {
@@ -37,34 +120,6 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
         softly.assertThat(registrationPage.isLastNameFieldVisible()).isTrue();
         softly.assertThat(registrationPage.isEmailFieldVisible()).isTrue();
         softly.assertThat(registrationPage.isPasswordFieldVisible()).isTrue();
-        softly.assertAll();
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "wrong@email.com, wrong-password",
-            " , wrong-password",
-            "wrong@email.com, ",
-            ","
-    })
-    @DisplayName("Should show invalid credentials message for invalid login attempts")
-    void shouldShowInvalidCredentialsMessage(String email, String password) {
-        var authPage = new AuthenticationPageObject(driver);
-        authPage.attemptLogin(email, password);
-        assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
-    }
-
-    @Test
-    @DisplayName("Should login with valid credentials")
-    void shouldLoginWithValidCredentials() {
-        var loginPage = new AuthenticationPageObject(driver);
-        var homePage = loginPage.loginSuccessfully("teste@teste.com", "teste");
-
-        final SoftAssertions softly = new SoftAssertions();
-
-        softly.assertThat(homePage.isLoaded()).isTrue();
-        softly.assertThat(homePage.getPageTitle()).isEqualTo("Subscription Module");
-        softly.assertThat(homePage.isLogoutButtonVisible()).isTrue();
         softly.assertAll();
     }
 

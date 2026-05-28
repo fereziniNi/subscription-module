@@ -4,9 +4,7 @@ import br.ifsp.demo.ui.base.BasePageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.Objects;
 
 public class AuthenticationPageObject extends BasePageObject {
@@ -17,7 +15,6 @@ public class AuthenticationPageObject extends BasePageObject {
     private static final By REGISTER_LINK = By.linkText("Register");
     private static final By PAGE_TITLE = By.cssSelector(".page-title");
     private static final By PAGE_SUBTITLE = By.cssSelector(".page-subtitle");
-    private static final By AUTH_FOOTER = By.cssSelector(".auth-footer");
 
 
     public AuthenticationPageObject(WebDriver driver) {
