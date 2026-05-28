@@ -5,7 +5,10 @@ import br.ifsp.demo.ui.objects.AuthenticationPageObject;
 import br.ifsp.demo.ui.objects.HomePageObject;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -27,6 +30,130 @@ class HomePageObjectTest extends BaseSeleniumTest {
     private HomePageObject loginAndNavigateToHome() {
         var authPage = new AuthenticationPageObject(driver);
         return authPage.loginSuccessfully(VALID_EMAIL, VALID_PASSWORD);
+    }
+
+    @Nested
+    @Tag("EquivalenceClassUi")
+    class EquivalenceClassUi {
+        @Test
+        @DisplayName("Should navigate to Create Subscription page when clicking the link")
+        void shouldNavigateToCreateSubscription() {
+            var homePage = loginAndNavigateToHome();
+            homePage.goToCreateSubscription();
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            wait.until(ExpectedConditions.urlContains("/subscriptions/create"));
+            assertThat(driver.getCurrentUrl()).contains("/subscriptions/create");
+        }
+
+        @Test
+        @DisplayName("Should navigate to View Subscriptions page when clicking the link")
+        void shouldNavigateToViewSubscriptions() {
+            var homePage = loginAndNavigateToHome();
+            homePage.goToViewSubscriptions();
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            wait.until(ExpectedConditions.urlContains("/subscriptions"));
+            assertThat(driver.getCurrentUrl()).contains("/subscriptions");
+        }
+
+        @Test
+        @DisplayName("Should navigate to Generate Invoice page when clicking the link")
+        void shouldNavigateToGenerateInvoice() {
+            var homePage = loginAndNavigateToHome();
+            homePage.goToGenerateInvoice();
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            wait.until(ExpectedConditions.urlContains("/invoices"));
+            assertThat(driver.getCurrentUrl()).contains("/invoices");
+        }
+
+        @Test
+        @DisplayName("Should logout when clicking Logout button")
+        void shouldLogoutWhenClickingLogoutButton() {
+            var homePage = loginAndNavigateToHome();
+
+            homePage.logout();
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should click back button and navigate to previous page")
+        void shouldClickBackButtonAndNavigate() {
+            var homePage = loginAndNavigateToHome();
+
+            homePage.clickBackButton();
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            wait.until(ExpectedConditions.or(
+                    ExpectedConditions.urlContains("/login"),
+                    ExpectedConditions.urlToBe(HOME_URL)
+            ));
+
+            assertThat(driver.getCurrentUrl()).isNotEmpty();
+        }
+
+        @Test
+        @DisplayName("Should redirect to login when accessing home without authentication")
+        void shouldRedirectToLoginWhenNotAuthenticated() {
+            driver.get(HOME_URL);
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
+
+        @Test
+        @DisplayName("Should display correct text for all menu links")
+        void shouldDisplayCorrectTextForAllMenuLinks() {
+            var homePage = loginAndNavigateToHome();
+
+            final SoftAssertions softly = new SoftAssertions();
+
+            String createText = driver.findElement(By.linkText("Create subscription")).getText();
+            String viewText = driver.findElement(By.linkText("View subscriptions")).getText();
+            String invoiceText = driver.findElement(By.linkText("Generate invoice")).getText();
+
+            softly.assertThat(createText).isEqualTo("Create subscription");
+            softly.assertThat(viewText).isEqualTo("View subscriptions");
+            softly.assertThat(invoiceText).isEqualTo("Generate invoice");
+
+            softly.assertAll();
+        }
+
+        @Test
+        @DisplayName("Should maintain session after navigating between pages")
+        void shouldMaintainSessionAfterNavigation() {
+            var homePage = loginAndNavigateToHome();
+
+            homePage.goToCreateSubscription();
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            wait.until(ExpectedConditions.urlContains("/subscriptions/create"));
+
+            driver.navigate().back();
+            wait.until(ExpectedConditions.urlContains(HOME_URL));
+
+            assertThat(driver.getCurrentUrl()).doesNotContain("/login");
+            assertThat(homePage.isLogoutButtonVisible()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Should logout and prevent access to home page after logout")
+        void shouldLogoutAndPreventAccessAfterLogout() {
+            var homePage = loginAndNavigateToHome();
+
+            homePage.logout();
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            driver.get(HOME_URL);
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            assertThat(driver.getCurrentUrl()).contains("/login");
+        }
     }
 
     @Test
@@ -79,49 +206,6 @@ class HomePageObjectTest extends BaseSeleniumTest {
     }
 
     @Test
-   @DisplayName("Should navigate to Create Subscription page when clicking the link")
-   void shouldNavigateToCreateSubscription() {
-        var homePage = loginAndNavigateToHome();
-        homePage.goToCreateSubscription();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.urlContains("/subscriptions/create"));
-        assertThat(driver.getCurrentUrl()).contains("/subscriptions/create");
-    }
-
-    @Test
-    @DisplayName("Should navigate to View Subscriptions page when clicking the link")
-    void shouldNavigateToViewSubscriptions() {
-        var homePage = loginAndNavigateToHome();
-        homePage.goToViewSubscriptions();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.urlContains("/subscriptions"));
-        assertThat(driver.getCurrentUrl()).contains("/subscriptions");
-    }
-
-    @Test
-    @DisplayName("Should navigate to Generate Invoice page when clicking the link")
-    void shouldNavigateToGenerateInvoice() {
-        var homePage = loginAndNavigateToHome();
-        homePage.goToGenerateInvoice();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.urlContains("/invoices"));
-        assertThat(driver.getCurrentUrl()).contains("/invoices");
-    }
-
-    @Test
-    @DisplayName("Should logout when clicking Logout button")
-    void shouldLogoutWhenClickingLogoutButton() {
-        var homePage = loginAndNavigateToHome();
-
-        homePage.logout();
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.urlContains("/login"));
-
-        assertThat(driver.getCurrentUrl()).contains("/login");
-    }
-
-    @Test
     @DisplayName("Should have data-discover attribute on menu links")
     void shouldHaveDataDiscoverAttributeOnLinks() {
         var homePage = loginAndNavigateToHome();
@@ -133,20 +217,5 @@ class HomePageObjectTest extends BaseSeleniumTest {
         softly.assertThat(homePage.hasDataDiscoverAttribute("Generate invoice")).isTrue();
 
         softly.assertAll();
-    }
-    @Test
-    @DisplayName("Should click back button and navigate to previous page")
-    void shouldClickBackButtonAndNavigate() {
-        var homePage = loginAndNavigateToHome();
-
-        homePage.clickBackButton();
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.urlContains("/login"),
-                ExpectedConditions.urlToBe(HOME_URL)
-        ));
-
-        assertThat(driver.getCurrentUrl()).isNotEmpty();
     }
 }
