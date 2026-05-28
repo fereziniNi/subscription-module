@@ -3,6 +3,7 @@ package br.ifsp.demo.ui.test;
 
 import br.ifsp.demo.ui.base.BaseSeleniumTest;
 import br.ifsp.demo.ui.objects.AuthenticationPageObject;
+import br.ifsp.demo.ui.objects.RegistrationPageObject;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,7 +13,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+
+import java.time.Duration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -103,6 +108,129 @@ public class AuthenticationPageObjectTest extends BaseSeleniumTest {
             var homePage = authPage.loginSuccessfully("teste@teste.com", "teste");
 
             assertThat(homePage.isLoaded()).isTrue();
+        }
+    }
+
+    @Nested
+    @Tag("LimitValueUi")
+    class LimitValueUi {
+        @Test
+        @DisplayName("Should accept email with minimum valid length")
+        void shouldAcceptEmailWithMinimumLength() {
+            driver.get("https://subscription-module-seven.vercel.app/register");
+            var registerPage = new RegistrationPageObject(driver);
+            String minEmail = "a@b.co";
+
+            registerPage.register("Test", "User", minEmail, "senha123");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            // Agora testar login
+            var authPage = new AuthenticationPageObject(driver);
+            var homePage = authPage.loginSuccessfully(minEmail, "senha123");
+
+            assertThat(homePage.isLoaded()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Should reject email below minimum length")
+        void shouldRejectEmailBelowMinimumLength() {
+            var authPage = new AuthenticationPageObject(driver);
+
+            authPage.attemptLogin("a@b.c", "senha123");
+
+            assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
+        }
+
+        @Test
+        @DisplayName("Should accept email with maximum valid length")
+        void shouldAcceptEmailWithMaximumLength() {
+            var authPage = new AuthenticationPageObject(driver);
+            String maxEmail = "a".repeat(243) + "@test.com";
+
+            driver.get("https://subscription-module-seven.vercel.app/register");
+            var registerPage = new RegistrationPageObject(driver);
+            registerPage.register("Test", "User", maxEmail, "senha123");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            var authPage2 = new AuthenticationPageObject(driver);
+            var homePage = authPage2.loginSuccessfully(maxEmail, "senha123");
+
+            assertThat(homePage.isLoaded()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Should reject email exceeding maximum length")
+        void shouldRejectEmailExceedingMaximumLength() {
+            var authPage = new AuthenticationPageObject(driver);
+            String tooLongEmail = "a".repeat(250) + "@test.com";
+
+            authPage.attemptLogin(tooLongEmail, "senha123");
+
+            assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
+        }
+
+        @Test
+        @DisplayName("Should accept password with minimum length")
+        void shouldAcceptPasswordWithMinimumLength() {
+            driver.get("https://subscription-module-seven.vercel.app/register");
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+
+            registerPage.register("Test", "User", email, "a");
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            // Testar login
+            var authPage = new AuthenticationPageObject(driver);
+            var homePage = authPage.loginSuccessfully(email, "a");
+
+            assertThat(homePage.isLoaded()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Should accept password with maximum valid length")
+        void shouldAcceptPasswordWithMaximumLength() {
+            driver.get("https://subscription-module-seven.vercel.app/register");
+            var registerPage = new RegistrationPageObject(driver);
+            String email = "teste" + System.currentTimeMillis() + "@teste.com";
+            String maxPassword = "P".repeat(128);
+
+            registerPage.register("Test", "User", email, maxPassword);
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            wait.until(ExpectedConditions.urlContains("/login"));
+
+            // Testar login
+            var authPage = new AuthenticationPageObject(driver);
+            var homePage = authPage.loginSuccessfully(email, maxPassword);
+
+            assertThat(homePage.isLoaded()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Should reject password exceeding maximum length")
+        void shouldRejectPasswordExceedingMaximumLength() {
+            var authPage = new AuthenticationPageObject(driver);
+            String tooLongPassword = "P".repeat(129);
+
+            authPage.attemptLogin("teste@teste.com", tooLongPassword);
+
+            assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
+        }
+
+        @Test
+        @DisplayName("Should reject empty password at boundary")
+        void shouldRejectEmptyPasswordAtBoundary() {
+            var authPage = new AuthenticationPageObject(driver);
+
+            authPage.attemptLogin("teste@teste.com", "");
+
+            assertThat(authPage.getErrorMessage()).isEqualTo("Invalid credentials.");
         }
     }
 
